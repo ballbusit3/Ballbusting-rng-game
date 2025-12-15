@@ -1,0 +1,5112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Cycle Game</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(180deg, #0a0a0f 0%, #0f172a 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        /* ========= HEADER ========= */
+        .game-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7dd3fc, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ========= BOSS WARNING ========= */
+        .boss-warning {
+            background: linear-gradient(135deg, #7f1d1d, #991b1b);
+            color: #fef2f2;
+            text-align: center;
+            padding: 12px 16px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            display: none;
+            animation: pulse-red 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* ========= MAIN GAME AREA ========= */
+        .game-container {
+            padding: 16px;
+            padding-bottom: 100px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .log-card {
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        .log-header {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .log-header-icon {
+            font-size: 18px;
+        }
+
+        .log-header-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        #log {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 16px;
+            max-height: calc(100vh - 320px);
+            min-height: 200px;
+            overflow-y: auto;
+            color: #cbd5e1;
+        }
+
+        /* ========= BOTTOM ACTION BAR ========= */
+        .controls-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0));
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(2, 6, 23, 0.98) 100%);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 200;
+        }
+
+        .controls-bar button {
+            flex: 1;
+            max-width: 160px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 14px;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .controls-bar button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .controls-bar button:active {
+            transform: translateY(0);
+        }
+
+        .controls-bar button.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .controls-bar button:disabled {
+            opacity: 0.4;
+            box-shadow: none;
+            cursor: default;
+            transform: none;
+        }
+
+        /* ========= MENU BUTTON ========= */
+        .menu-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, #334155, #1e293b);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #e2e8f0;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 600;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            transition: transform 0.15s, background 0.15s;
+        }
+
+        .menu-toggle:hover {
+            background: linear-gradient(135deg, #475569, #334155);
+            transform: scale(1.05);
+        }
+
+        /* ========= POP-OUT MENU ========= */
+        .popout-menu {
+            position: fixed;
+            top: 68px;
+            right: 16px;
+            width: 200px;
+            padding: 8px;
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 650;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px) scale(0.95);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .popout-menu.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .popout-menu button {
+            background: transparent;
+            color: #e2e8f0;
+            border: none;
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+        }
+
+        .popout-menu button:hover {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .popout-menu button .icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: rgba(148, 163, 184, 0.15);
+            margin: 6px 0;
+        }
+
+        /* ========= HIDDEN BADGES ========= */
+        .hidden-badge {
+            display: none;
+        }
+
+        /* ========= SETTINGS OVERLAY ========= */
+        .settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 400;
+            backdrop-filter: blur(4px);
+        }
+
+        .settings-overlay.active {
+            display: flex;
+        }
+
+        .settings-panel {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+            max-width: 440px;
+            width: 95%;
+            max-height: 90vh;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .settings-header {
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.3);
+        }
+
+        .settings-panel h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .settings-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 10px 14px;
+            background: rgba(15, 23, 42, 0.5);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            overflow-x: auto;
+        }
+
+        .settings-tab {
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .settings-tab:hover {
+            background: rgba(148, 163, 184, 0.1);
+            color: #e2e8f0;
+        }
+
+        .settings-tab.active {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+        }
+
+        .settings-body {
+            padding: 14px 18px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .settings-section {
+            display: none;
+        }
+
+        .settings-section.active {
+            display: block;
+        }
+
+        .settings-group {
+            margin-bottom: 16px;
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .settings-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-group h3 {
+            margin: 0 0 6px;
+            font-size: 15px;
+            color: #7dd3fc;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-group h3 .icon {
+            font-size: 16px;
+        }
+
+        .settings-group .description {
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .field-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .field-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .field-row label {
+            font-size: 13px;
+            color: #e2e8f0;
+            flex: 1;
+        }
+
+        .field-row input {
+            width: 75px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e5e7eb;
+            font-size: 13px;
+            text-align: center;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .field-row input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .field-row select {
+            width: 140px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e5e7eb;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .field-row select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .field-row .dual-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .field-row .dual-input input {
+            width: 60px;
+        }
+
+        .field-row .triple-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .field-row .triple-input input {
+            width: 50px;
+        }
+
+        .settings-footer {
+            padding: 14px 18px;
+            border-top: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: rgba(30, 41, 59, 0.3);
+        }
+
+        .btn-close {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .btn-close:hover {
+            background: rgba(148, 163, 184, 0.1);
+            color: #e2e8f0;
+        }
+
+        .btn-secondary {
+            background: rgba(71, 85, 105, 0.5);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(71, 85, 105, 0.7);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        /* ========= TARGET OVERLAY ========= */
+        .target-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+            backdrop-filter: blur(4px);
+        }
+
+        .target-overlay.active {
+            display: flex;
+        }
+
+        .target-panel {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+            max-width: 380px;
+            width: 95%;
+            padding: 24px;
+        }
+
+        .target-panel h2 {
+            margin: 0 0 8px;
+            font-size: 22px;
+            background: linear-gradient(135deg, #7dd3fc, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .target-panel .subtitle {
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .target-field {
+            margin-bottom: 16px;
+        }
+
+        .target-field label {
+            display: block;
+            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .target-field input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e5e7eb;
+            font-size: 16px;
+            text-align: center;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .target-field input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .target-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .target-buttons button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .target-buttons button:hover {
+            transform: translateY(-1px);
+        }
+
+        .target-buttons .btn-skip {
+            background: rgba(71, 85, 105, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+        }
+
+        .target-buttons .btn-confirm {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* ========= TARGET WARNING OVERLAY ========= */
+        .target-warning-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 600;
+        }
+
+        .target-warning-overlay.active {
+            display: flex;
+        }
+
+        .target-warning-panel {
+            background: linear-gradient(145deg, #1c1917, #0f0a07);
+            border-radius: 20px;
+            border: 2px solid #dc2626;
+            box-shadow: 0 16px 48px rgba(220, 38, 38, 0.3);
+            max-width: 340px;
+            width: 95%;
+            padding: 28px;
+            text-align: center;
+        }
+
+        .target-warning-panel .warning-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .target-warning-panel h2 {
+            margin: 0 0 12px;
+            font-size: 22px;
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        .target-warning-panel p {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .target-warning-panel button {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+            transition: transform 0.15s;
+        }
+
+        .target-warning-panel button:hover {
+            transform: translateY(-1px);
+        }
+
+        /* ========= GIVE UP CONFIRMATION OVERLAY ========= */
+        .giveup-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 700;
+            backdrop-filter: blur(4px);
+        }
+
+        .giveup-confirm-overlay.active {
+            display: flex;
+        }
+
+        .giveup-confirm-panel {
+            background: linear-gradient(145deg, #1c1917, #0f0a07);
+            border-radius: 20px;
+            border: 2px solid #dc2626;
+            box-shadow: 0 16px 48px rgba(220, 38, 38, 0.3);
+            max-width: 360px;
+            width: 95%;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .giveup-confirm-panel .warning-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+
+        .giveup-confirm-panel h2 {
+            margin: 0 0 12px;
+            font-size: 24px;
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        .giveup-confirm-panel p {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .giveup-confirm-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .giveup-confirm-buttons button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+            min-width: 120px;
+        }
+
+        .giveup-confirm-buttons .btn-cancel {
+            background: rgba(71, 85, 105, 0.6);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .giveup-confirm-buttons .btn-cancel:hover {
+            transform: translateY(-1px);
+            background: rgba(71, 85, 105, 0.8);
+        }
+
+        .giveup-confirm-buttons .btn-confirm-giveup {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+        }
+
+        .giveup-confirm-buttons .btn-confirm-giveup:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .giveup-confirm-buttons .btn-confirm-giveup:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #6b7280;
+            box-shadow: none;
+        }
+
+        .giveup-countdown {
+            font-size: 12px;
+            color: #fbbf24;
+            margin-top: 4px;
+        }
+
+        /* ========= UNDO CYCLE CONFIRMATION OVERLAY ========= */
+        .undo-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 700;
+            backdrop-filter: blur(4px);
+        }
+
+        .undo-confirm-overlay.active {
+            display: flex;
+        }
+
+        .undo-confirm-panel {
+            background: linear-gradient(145deg, #1a1c2e, #0a0b14);
+            border-radius: 20px;
+            border: 2px solid #f59e0b;
+            box-shadow: 0 16px 48px rgba(245, 158, 11, 0.3);
+            max-width: 360px;
+            width: 95%;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .undo-confirm-panel .warning-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+
+        .undo-confirm-panel h2 {
+            margin: 0 0 12px;
+            font-size: 24px;
+            color: #fbbf24;
+            font-weight: 700;
+        }
+
+        .undo-confirm-panel p {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .undo-confirm-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .undo-confirm-buttons button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+            min-width: 120px;
+        }
+
+        .undo-confirm-buttons .btn-cancel {
+            background: rgba(71, 85, 105, 0.6);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .undo-confirm-buttons .btn-cancel:hover {
+            transform: translateY(-1px);
+            background: rgba(71, 85, 105, 0.8);
+        }
+
+        .undo-confirm-buttons .btn-confirm-undo {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+        }
+
+        .undo-confirm-buttons .btn-confirm-undo:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .undo-confirm-buttons .btn-confirm-undo:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #6b7280;
+            box-shadow: none;
+        }
+
+        /* ========= PROFILE OVERLAY ========= */
+        .profile-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 400;
+            backdrop-filter: blur(4px);
+        }
+
+        .profile-panel {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+            max-width: 420px;
+            width: 95%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .profile-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #f1f5f9;
+        }
+
+        .profile-body {
+            padding: 18px 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .profile-body textarea {
+            width: 100%;
+            height: 180px;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e5e7eb;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        .profile-body textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .profile-footer {
+            padding: 14px 20px;
+            border-top: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .profile-footer button {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .profile-footer button:hover {
+            transform: translateY(-1px);
+        }
+
+        /* ========= RESPONSIVE ========= */
+        @media (min-width: 720px) {
+            #log {
+                max-height: 500px;
+            }
+            
+            .game-container {
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .controls-bar button {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+
+        /* ========= CYCLE SUMMARY OVERLAY ========= */
+        .summary-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 15, 0.98);
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            z-index: 500;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .summary-overlay.active {
+            display: flex;
+        }
+
+        .summary-panel {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+            max-width: 500px;
+            width: 100%;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+
+        .summary-header {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            padding: 20px 24px;
+            text-align: center;
+        }
+
+        .summary-header.give-up {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .summary-header.boss-fail {
+            background: linear-gradient(135deg, #7f1d1d, #450a0a);
+        }
+
+        .summary-header h2 {
+            margin: 0 0 4px;
+            font-size: 24px;
+            color: white;
+            font-weight: 700;
+        }
+
+        .summary-header .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .summary-body {
+            padding: 20px;
+        }
+
+        .summary-section {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .summary-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .summary-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #7dd3fc;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .summary-row:first-of-type {
+            padding-top: 0;
+        }
+
+        .summary-row .label {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .summary-row .value {
+            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .summary-row .value.positive {
+            color: #4ade80;
+        }
+
+        .summary-row .value.negative {
+            color: #f87171;
+        }
+
+        .summary-row .value.highlight {
+            color: #fbbf24;
+        }
+
+        .target-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .target-check .icon {
+            font-size: 16px;
+        }
+
+        .target-check .icon.met {
+            color: #4ade80;
+        }
+
+        .target-check .icon.missed {
+            color: #f87171;
+        }
+
+        .swing-breakdown {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .swing-item {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .swing-item .name {
+            color: #94a3b8;
+        }
+
+        .swing-item .count {
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .punishment-item {
+            background: rgba(127, 29, 29, 0.3);
+            border-left: 3px solid #ef4444;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            color: #fca5a5;
+        }
+
+        .punishment-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .progress-stat {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .progress-stat:last-child {
+            margin-bottom: 0;
+        }
+
+        .progress-stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-stat-name {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .progress-stat-value {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .progress-stat-bar {
+            height: 6px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-stat-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .progress-stat-fill.full {
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+        }
+
+        .progress-stat-fill.ruined {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+        }
+
+        .progress-stat-fill.unlocked {
+            background: linear-gradient(90deg, #10b981, #06b6d4);
+        }
+
+        .progress-outcome {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 6px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .progress-outcome.hit {
+            background: rgba(127, 29, 29, 0.3);
+            color: #fca5a5;
+        }
+
+        .progress-outcome.success {
+            background: rgba(22, 101, 52, 0.3);
+            color: #86efac;
+        }
+
+        .summary-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(148, 163, 184, 0.15);
+            display: flex;
+            justify-content: center;
+        }
+
+        .summary-footer button {
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.15s;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .summary-footer button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ========= GAMEPLAY VISUALS ========= */
+        .game-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+
+        .game-message .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .game-message .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+        }
+
+        .game-message .subtitle {
+            font-size: 14px;
+        }
+
+        /* Block Card */
+        .block-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .block-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .block-header {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .block-header .block-title {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .block-header .block-info {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .block-body {
+            padding: 8px;
+        }
+
+        /* MAX POWER Block */
+        .block-card.max-power {
+            border-color: rgba(251, 191, 36, 0.4);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.15);
+        }
+
+        .block-card.max-power .block-header {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.1));
+        }
+
+        .block-card.max-power .block-title {
+            color: #fbbf24;
+        }
+
+        /* Boss Block */
+        .block-card.boss-block {
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+            animation: boss-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes boss-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }
+        }
+
+        .block-card.boss-block .block-header {
+            background: linear-gradient(135deg, rgba(127, 29, 29, 0.6), rgba(69, 10, 10, 0.4));
+        }
+
+        .block-card.boss-block .block-title {
+            color: #fca5a5;
+        }
+
+        /* Round Items */
+        .round-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 6px;
+            margin-bottom: 2px;
+        }
+
+        .round-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .round-number {
+            width: 18px;
+            height: 18px;
+            background: rgba(148, 163, 184, 0.15);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .round-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .difficulty-badge {
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        .difficulty-badge.easy {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .difficulty-badge.medium {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .difficulty-badge.hard {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+        }
+
+        .difficulty-badge.extreme {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+        }
+
+        .difficulty-badge.full-force {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .difficulty-badge.max-power {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.2));
+            color: #fbbf24;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+        }
+
+        .swing-count {
+            font-size: 11px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-message:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-message .icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .status-message .text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .status-message.info {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+        }
+
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .status-message.warning {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fde047;
+        }
+
+        .status-message.danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .status-message.penalty {
+            background: rgba(127, 29, 29, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        /* Exit Result */
+        .exit-result {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .exit-result.continue {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(239, 68, 68, 0.15));
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .exit-result.end {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.15));
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .exit-result .result-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .exit-result .result-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+
+        .exit-result .result-detail {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        /* Cycle Start Message */
+        .cycle-start {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
+            border-radius: 14px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            margin-bottom: 12px;
+        }
+
+        .cycle-start .cycle-number {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7dd3fc, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .cycle-start .cycle-label {
+            font-size: 14px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .targets-display {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        .targets-display .targets-title {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .targets-display .target-chips {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .target-chip {
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #fde047;
+            font-weight: 500;
+        }
+
+        /* Boss Complete */
+        .boss-complete {
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(145deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.1));
+            border-radius: 14px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .boss-complete .icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .boss-complete .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4ade80;
+            margin-bottom: 4px;
+        }
+
+        .boss-complete .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HEADER -->
+    <div class="game-header">
+        <div class="header-title">
+            <h1>⚡ Cycle Game</h1>
+        </div>
+    </div>
+
+    <!-- BOSS WARNING -->
+    <div id="bossWarningBar" class="boss-warning">⚠️ BOSS BLOCK ACTIVE — SHOW NO WEAKNESS ⚠️</div>
+
+    <!-- MAIN GAME AREA -->
+    <div class="game-container">
+        <div class="log-card">
+            <div class="log-header">
+                <span class="log-header-icon">📜</span>
+                <span class="log-header-text">Game Log</span>
+            </div>
+            <div id="log"></div>
+        </div>
+
+        <!-- Hidden badges for internal tracking -->
+        <span id="cycleBadge" class="hidden-badge"></span>
+        <span id="blockBadge" class="hidden-badge"></span>
+        <span id="roundBadge" class="hidden-badge"></span>
+        <span id="exitBadge" class="hidden-badge"></span>
+        <span id="lockBadge" class="hidden-badge"></span>
+        <span id="cookieBadge" class="hidden-badge"></span>
+    </div>
+
+    <!-- BOTTOM ACTION BAR -->
+    <div class="controls-bar">
+        <button onclick="nextBlock()">Next</button>
+        <button id="btnImDone" onclick="pressImDone()">I'm done</button>
+        <button id="btnGiveUp" class="danger" onclick="pressGiveUp()">Give up</button>
+    </div>
+
+    <!-- SETTINGS OVERLAY -->
+    <div id="settingsOverlay" class="settings-overlay">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h2>⚙️ Settings</h2>
+                <button class="btn-close" onclick="closeSettings()">✕</button>
+            </div>
+            
+            <div class="settings-tabs">
+                <button class="settings-tab active" onclick="switchSettingsTab('basics')">Basics</button>
+                <button class="settings-tab" onclick="switchSettingsTab('progress')">Progress</button>
+                <button class="settings-tab" onclick="switchSettingsTab('punishments')">Punishments</button>
+                <button class="settings-tab" onclick="switchSettingsTab('events')">Events</button>
+                <button class="settings-tab" onclick="switchSettingsTab('advanced')">Advanced</button>
+            </div>
+            
+            <div class="settings-body">
+                
+                <!-- BASICS TAB -->
+                <div id="settingsBasics" class="settings-section active">
+                    
+                    <div class="settings-group">
+                        <h3><span class="icon">🎲</span> Difficulty Chances</h3>
+                        <div class="description">
+                            Each round rolls one of 6 difficulty levels. Higher difficulties give more Progress but are rarer. The % values control how often each appears.
+                        </div>
+                        <div id="settingsDiffs"></div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">📦</span> Block Sizes</h3>
+                        <div class="description">
+                            Set the min/max rounds per block. The range is divided into 4 equal bands (each 25%). Adjust weights to favor smaller or larger blocks.
+                        </div>
+                        <div class="field-row">
+                            <label>Rounds range (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" min="1" id="blockRoundsMinInput" />
+                                <input type="number" step="1" min="1" id="blockRoundsMaxInput" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Band 1 weight (0-25%)</label>
+                            <input type="number" step="1" min="0" id="blockBandW0" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 2 weight (25-50%)</label>
+                            <input type="number" step="1" min="0" id="blockBandW1" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 3 weight (50-75%)</label>
+                            <input type="number" step="1" min="0" id="blockBandW2" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 4 weight (75-100%)</label>
+                            <input type="number" step="1" min="0" id="blockBandW3" />
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">💥</span> Swings Per Round</h3>
+                        <div class="description">
+                            Each round generates a random number of swings within these ranges based on difficulty. Harder = fewer swings.
+                        </div>
+                        <div class="field-row">
+                            <label>Easy (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" id="swingEasyMin" />
+                                <input type="number" step="1" id="swingEasyMax" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Medium (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" id="swingMediumMin" />
+                                <input type="number" step="1" id="swingMediumMax" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Hard (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" id="swingHardMin" />
+                                <input type="number" step="1" id="swingHardMax" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Extreme (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" id="swingExtremeMin" />
+                                <input type="number" step="1" id="swingExtremeMax" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Full Force (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" id="swingFullForceMin" />
+                                <input type="number" step="1" id="swingFullForceMax" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>MAX POWER (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" id="swingMaxPowerMin" />
+                                <input type="number" step="1" id="swingMaxPowerMax" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">🚪</span> Exit Chances ("I'm done")</h3>
+                        <div class="description">
+                            When you press "I'm done", the game rolls to see if you can leave. These are your chances to successfully exit on each attempt.
+                        </div>
+                        <div class="field-row">
+                            <label>Min rounds before exit</label>
+                            <input type="number" step="1" min="1" id="minRoundsBeforeExitInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>1st attempt %</label>
+                            <input type="number" step="1" id="exitEnd0" />
+                        </div>
+                        <div class="field-row">
+                            <label>2nd attempt %</label>
+                            <input type="number" step="1" id="exitEnd1" />
+                        </div>
+                        <div class="field-row">
+                            <label>3rd attempt %</label>
+                            <input type="number" step="1" id="exitEnd2" />
+                        </div>
+                        <div class="field-row">
+                            <label>4th attempt %</label>
+                            <input type="number" step="1" id="exitEnd3" />
+                        </div>
+                        <div class="field-row">
+                            <label>5th+ attempt %</label>
+                            <input type="number" step="1" id="exitEnd4" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PROGRESS TAB -->
+                <div id="settingsProgress" class="settings-section">
+                    
+                    <div class="settings-group">
+                        <h3><span class="icon">📈</span> Per-Round Growth Range</h3>
+                        <div class="description">
+                            Each round, your Progress (Full, Ruined, Unlocked) increases by a random amount within these ranges. Lower = slower grind. Values are in %.
+                        </div>
+                        <div class="field-row">
+                            <label>Full (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="0.00001" id="fullMinPerRoundInput" />
+                                <input type="number" step="0.00001" id="fullMaxPerRoundInput" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Ruined (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="0.00001" id="halfMinPerRoundInput" />
+                                <input type="number" step="0.00001" id="halfMaxPerRoundInput" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Unlocked (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="0.00001" id="lockMinPerRoundInput" />
+                                <input type="number" step="0.00001" id="lockMaxPerRoundInput" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">🎰</span> Growth RNG Bands</h3>
+                        <div class="description">
+                            Per-round growth picks from Low/Medium/High bands. Higher weight = more likely. Momentum shifts weight from Low toward High over time.
+                        </div>
+                        <div class="field-row">
+                            <label>Low band weight</label>
+                            <input type="number" step="1" id="bandWeightLowInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Medium band weight</label>
+                            <input type="number" step="1" id="bandWeightMedInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>High band weight</label>
+                            <input type="number" step="1" id="bandWeightHighInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Shift per momentum</label>
+                            <input type="number" step="0.1" id="bandShiftPerMomentumInput" />
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">🔥</span> Momentum System</h3>
+                        <div class="description">
+                            Momentum builds as you play and boosts your growth caps. It resets each cycle. Big blocks and MAX POWER cycles give bonus momentum.
+                        </div>
+                        <div class="field-row">
+                            <label>Rounds per +1 momentum</label>
+                            <input type="number" step="1" id="momentumRoundsPerStepInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Big block threshold</label>
+                            <input type="number" step="1" id="momentumBigBlockThresholdInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Big block bonus</label>
+                            <input type="number" step="1" id="momentumBigBlockBonusInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>MAX POWER cycle bonus</label>
+                            <input type="number" step="1" id="momentumMaxCycleBonusInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Cap boost per level</label>
+                            <input type="number" step="0.001" id="momentumCapPerLevelInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Max cap multiplier</label>
+                            <input type="number" step="0.01" id="momentumCapMaxMultInput" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PUNISHMENTS TAB -->
+                <div id="settingsPunishments" class="settings-section">
+                    
+                    <div class="settings-group">
+                        <h3><span class="icon">⚠️</span> Early Exit Penalty</h3>
+                        <div class="description">
+                            Triggered when pressing "I'm done" before completing 2 blocks. Applies flat Progress loss, then reduces remaining Progress by a percentage.
+                        </div>
+                        <div class="field-row">
+                            <label>Flat Progress loss (%)</label>
+                            <input type="number" step="0.1" id="earlyExitFlatPenaltyInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Progress reduction (%)</label>
+                            <input type="number" step="1" id="earlyExitPercentPenaltyInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Wipe momentum?</label>
+                            <select id="earlyExitWipeMomentumInput">
+                                <option value="1">Yes - Full wipe</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">🏳️</span> Give Up Penalty</h3>
+                        <div class="description">
+                            Triggered when pressing "Give up". Applies percentage reduction to Progress, then flat loss. Ends the cycle immediately with punishment.
+                        </div>
+                        <div class="field-row">
+                            <label>Progress reduction (%)</label>
+                            <input type="number" step="1" id="giveUpPercentPenaltyInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Flat Progress loss (%)</label>
+                            <input type="number" step="0.1" id="giveUpFlatPenaltyInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Momentum set to</label>
+                            <input type="number" step="1" id="momentumGiveUpResetToInput" />
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">🎯</span> Target Penalties</h3>
+                        <div class="description">
+                            Applied when you try to exit or give up before reaching your cycle targets.
+                        </div>
+                        <div class="field-row">
+                            <label>"I'm done" penalty (%)</label>
+                            <input type="number" step="0.1" id="targetImDonePenaltyInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>"Give up" extra penalty (%)</label>
+                            <input type="number" step="0.1" id="targetGiveUpPenaltyInput" />
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">💀</span> Boss Block Cowardice</h3>
+                        <div class="description">
+                            If you press "I'm done" or "Give up" during a Boss Block, all Progress is set to this value. Don't be a coward.
+                        </div>
+                        <div class="field-row">
+                            <label>Progress set to (%)</label>
+                            <input type="number" step="1" id="bossCowardicePenaltyInput" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- EVENTS TAB -->
+                <div id="settingsEvents" class="settings-section">
+                    
+                    <div class="settings-group">
+                        <h3><span class="icon">⚡</span> MAX POWER Cycle</h3>
+                        <div class="description">
+                            Rare event where an entire block becomes MAX POWER difficulty with boosted gains. Very rewarding but intense.
+                        </div>
+                        <div class="field-row">
+                            <label>Trigger chance (%)</label>
+                            <input type="number" step="0.01" id="maxPowerChanceInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Min rounds</label>
+                            <input type="number" step="1" id="maxPowerBlockMinInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Max rounds</label>
+                            <input type="number" step="1" id="maxPowerBlockMaxInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Growth multiplier</label>
+                            <input type="number" step="0.01" id="maxPowerMultiplierInput" />
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">👹</span> Boss Block</h3>
+                        <div class="description">
+                            Terrifying event with massive swings but ZERO Progress gains. Survive it, or face total save corruption if you quit.
+                        </div>
+                        <div class="field-row">
+                            <label>Trigger chance (%)</label>
+                            <input type="number" step="0.01" id="bossBlockChanceInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Min rounds</label>
+                            <input type="number" step="1" id="bossMinRoundsInput" />
+                        </div>
+                        <div class="field-row">
+                            <label>Max rounds</label>
+                            <input type="number" step="1" id="bossMaxRoundsInput" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ADVANCED TAB -->
+                <div id="settingsAdvanced" class="settings-section">
+                    
+                    <div class="settings-group">
+                        <h3><span class="icon">🎲</span> End-of-Cycle Outcome Roll</h3>
+                        <div class="description">
+                            When a cycle ends, the game rolls to see if Full or Ruined is "hit". Set the roll range and band weights. Lower bands favor lower Progress values.
+                        </div>
+                        <div class="field-row">
+                            <label>Roll range (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" min="1" id="cookieRollMinInput" />
+                                <input type="number" step="1" min="1" id="cookieRollMaxInput" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Band 1 weight (0-25%)</label>
+                            <input type="number" step="0.1" id="cookieBandW0" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 2 weight (25-50%)</label>
+                            <input type="number" step="0.1" id="cookieBandW1" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 3 weight (50-75%)</label>
+                            <input type="number" step="0.1" id="cookieBandW2" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 4 weight (75-100%)</label>
+                            <input type="number" step="0.1" id="cookieBandW3" />
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">🔓</span> Unlocked Roll</h3>
+                        <div class="description">
+                            Only rolled if Full or Ruined is hit. Determines if you unlock or stay locked. Set the roll range and band weights. Higher weights on high bands = harder to escape.
+                        </div>
+                        <div class="field-row">
+                            <label>Roll range (min / max)</label>
+                            <div class="dual-input">
+                                <input type="number" step="1" min="1" id="lockRollMinInput" />
+                                <input type="number" step="1" min="1" id="lockRollMaxInput" />
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <label>Band 1 weight (0-25%)</label>
+                            <input type="number" step="0.1" id="lockBandW0" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 2 weight (25-50%)</label>
+                            <input type="number" step="0.1" id="lockBandW1" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 3 weight (50-75%)</label>
+                            <input type="number" step="0.1" id="lockBandW2" />
+                        </div>
+                        <div class="field-row">
+                            <label>Band 4 weight (75-100%)</label>
+                            <input type="number" step="0.1" id="lockBandW3" />
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">👹</span> Boss Block</h3>
+                        <div class="description">
+                            Boss Blocks are brutal challenges with no gains. The swing multiplier determines how many swings per round during a Boss Block.
+                        </div>
+                        <div class="field-row">
+                            <label>Boss swing multiplier</label>
+                            <input type="number" step="1" min="1" id="bossSwingMultiplierInput" />
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">💾</span> Save Settings</h3>
+                        <div class="description">
+                            Mid-cycle progress is temporarily saved. If you're inactive too long, it reverts to your last completed cycle.
+                        </div>
+                        <div class="field-row">
+                            <label>Soft save timeout (minutes)</label>
+                            <input type="number" step="1" min="1" id="softSaveTimeoutInput" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="settings-footer">
+                <button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn-primary" onclick="applySettings()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARGET OVERLAY -->
+    <div id="targetOverlay" class="target-overlay">
+        <div class="target-panel">
+            <h2>🎯 Set Targets</h2>
+            <p class="subtitle">Optional goals for this cycle. Leave at 0 to disable.</p>
+            
+            <div class="target-field">
+                <label>Target Swings (total hits)</label>
+                <input type="number" id="targetSwingsInput" value="0" min="0" />
+            </div>
+            <div class="target-field">
+                <label>Target Rounds</label>
+                <input type="number" id="targetRoundsInput" value="0" min="0" />
+            </div>
+            <div class="target-field">
+                <label>Target Blocks</label>
+                <input type="number" id="targetBlocksInput" value="0" min="0" />
+            </div>
+            
+            <div class="target-buttons">
+                <button class="btn-skip" onclick="skipTargets()">Skip</button>
+                <button class="btn-confirm" onclick="confirmTargets()">Start Cycle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARGET WARNING OVERLAY -->
+    <div id="targetWarningOverlay" class="target-warning-overlay">
+        <div class="target-warning-panel">
+            <div class="warning-icon">⚠️</div>
+            <h2>Target Not Reached</h2>
+            <p>You haven't reached your targets yet. A penalty has been applied. Keep going!</p>
+            <button onclick="closeTargetWarning()">Continue</button>
+        </div>
+    </div>
+
+    <!-- PROFILE OVERLAY -->
+    <div id="profileOverlay" class="profile-overlay">
+        <div class="profile-panel">
+            <div class="profile-header">
+                <h2>📋 Import / Export Profile</h2>
+                <button class="btn-close" onclick="closeProfile()">✕</button>
+            </div>
+            <div class="profile-body">
+                <textarea id="profileText" placeholder="Paste a profile here to import settings + progress, or export your current game."></textarea>
+            </div>
+            <div class="profile-footer">
+                <button class="btn-secondary" onclick="exportSettingsToText()">Export</button>
+                <button class="btn-primary" onclick="importSettingsFromText()">Import</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GIVE UP CONFIRMATION OVERLAY -->
+    <div id="giveUpOverlay" class="giveup-confirm-overlay">
+        <div class="giveup-confirm-panel">
+            <div class="warning-icon">⚠️</div>
+            <h2>Give Up?</h2>
+            <p>Are you sure you want to give up? This will end the cycle with heavy penalties!</p>
+            <div class="giveup-confirm-buttons">
+                <button class="btn-cancel" onclick="cancelGiveUp()">No, Continue</button>
+                <button class="btn-confirm-giveup" id="confirmGiveUpBtn" onclick="confirmGiveUp()" disabled>
+                    <span id="giveUpCountdown">Wait 5s</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UNDO CYCLE CONFIRMATION OVERLAY -->
+    <div id="undoOverlay" class="undo-confirm-overlay">
+        <div class="undo-confirm-panel">
+            <div class="warning-icon">↩️</div>
+            <h2>Undo Entire Cycle?</h2>
+            <p>This will revert all progress from this cycle and return to the state before it started.</p>
+            <div class="undo-confirm-buttons">
+                <button class="btn-cancel" onclick="cancelUndo()">No, Keep Progress</button>
+                <button class="btn-confirm-undo" id="confirmUndoBtn" onclick="confirmUndo()" disabled>
+                    <span id="undoCountdown">Wait 5s</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CYCLE SUMMARY OVERLAY -->
+    <div id="summaryOverlay" class="summary-overlay">
+        <div class="summary-panel">
+            <div id="summaryHeader" class="summary-header">
+                <h2 id="summaryTitle">Cycle 1 Complete</h2>
+                <div id="summarySubtitle" class="subtitle">Successfully exited</div>
+            </div>
+            
+            <div class="summary-body">
+                <!-- Targets Section (conditional) -->
+                <div id="summaryTargets" class="summary-section" style="display:none;">
+                    <div class="summary-section-title">🎯 Targets</div>
+                    <div id="summaryTargetsContent"></div>
+                </div>
+
+                <!-- Activity Section -->
+                <div class="summary-section">
+                    <div class="summary-section-title">📊 Activity</div>
+                    <div class="summary-row">
+                        <span class="label">Blocks Completed</span>
+                        <span class="value" id="sumBlocks">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Rounds Completed</span>
+                        <span class="value" id="sumRounds">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Total Swings</span>
+                        <span class="value highlight" id="sumTotalSwings">0</span>
+                    </div>
+                    <div class="swing-breakdown" id="sumSwingBreakdown">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Exit Attempts Section -->
+                <div class="summary-section">
+                    <div class="summary-section-title">🚪 Exit Attempts</div>
+                    <div class="summary-row">
+                        <span class="label">Attempts Made</span>
+                        <span class="value" id="sumExitAttempts">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Result</span>
+                        <span class="value" id="sumExitResult">—</span>
+                    </div>
+                </div>
+
+                <!-- Momentum Section -->
+                <div class="summary-section">
+                    <div class="summary-section-title">🔥 Momentum</div>
+                    <div class="summary-row">
+                        <span class="label">Peak Level</span>
+                        <span class="value highlight" id="sumMomentumPeak">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Total Gained</span>
+                        <span class="value positive" id="sumMomentumGain">+0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Lost to Penalties</span>
+                        <span class="value negative" id="sumMomentumLoss">-0</span>
+                    </div>
+                </div>
+
+                <!-- Punishments Section (conditional) -->
+                <div id="summaryPunishments" class="summary-section" style="display:none;">
+                    <div class="summary-section-title">⚠️ Punishments</div>
+                    <div id="summaryPunishmentsContent"></div>
+                </div>
+
+                <!-- Boss Event Section (conditional) -->
+                <div id="summaryBoss" class="summary-section" style="display:none;">
+                    <div class="summary-section-title">👹 Boss Event</div>
+                    <div id="summaryBossContent"></div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="summary-section">
+                    <div class="summary-section-title">📈 Progress & Outcomes</div>
+                    
+                    <div class="progress-stat">
+                        <div class="progress-stat-header">
+                            <span class="progress-stat-name">Full</span>
+                            <span class="progress-stat-value" id="sumFullValue">0%</span>
+                        </div>
+                        <div class="progress-stat-bar">
+                            <div class="progress-stat-fill full" id="sumFullBar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-outcome" id="sumFullOutcome">No roll triggered</div>
+                    </div>
+                    
+                    <div class="progress-stat">
+                        <div class="progress-stat-header">
+                            <span class="progress-stat-name">Ruined</span>
+                            <span class="progress-stat-value" id="sumRuinedValue">0%</span>
+                        </div>
+                        <div class="progress-stat-bar">
+                            <div class="progress-stat-fill ruined" id="sumRuinedBar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-outcome" id="sumRuinedOutcome">No roll triggered</div>
+                    </div>
+                    
+                    <div class="progress-stat">
+                        <div class="progress-stat-header">
+                            <span class="progress-stat-name">Unlocked</span>
+                            <span class="progress-stat-value" id="sumUnlockedValue">0%</span>
+                        </div>
+                        <div class="progress-stat-bar">
+                            <div class="progress-stat-fill unlocked" id="sumUnlockedBar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-outcome" id="sumUnlockedOutcome">Not rolled</div>
+                    </div>
+                </div>
+
+                <!-- Next Cycle Section -->
+                <div class="summary-section">
+                    <div class="summary-section-title">➡️ Next Cycle Starts With</div>
+                    <div class="summary-row">
+                        <span class="label">Full</span>
+                        <span class="value" id="sumNextFull">0%</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Ruined</span>
+                        <span class="value" id="sumNextRuined">0%</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label">Unlocked</span>
+                        <span class="value" id="sumNextUnlocked">0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-footer">
+                <button onclick="closeSummaryAndContinue()">Continue to Next Cycle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU BUTTON (placed after overlays for proper z-index stacking) -->
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+    <!-- POP-OUT MENU -->
+    <div id="menu" class="popout-menu">
+        <button onclick="undoLastBlock()"><span class="icon">⟲</span> Previous</button>
+        <button onclick="showUndoConfirmation()"><span class="icon">↩️</span> Undo Cycle</button>
+        <button onclick="pressReveal()"><span class="icon">👁</span> Reveal</button>
+        <div class="menu-divider"></div>
+        <button onclick="saveState()"><span class="icon">💾</span> Save</button>
+        <button onclick="loadState()"><span class="icon">📂</span> Load</button>
+        <div class="menu-divider"></div>
+        <button onclick="openSettings()"><span class="icon">⚙️</span> Settings</button>
+        <button onclick="openProfile()"><span class="icon">📋</span> Profile</button>
+        <button onclick="resetAll()"><span class="icon">🗑️</span> Reset</button>
+    </div>
+
+    <script>
+/* ========= MENU TOGGLE ========= */
+function toggleMenu() {
+  document.getElementById("menu").classList.toggle("active");
+}
+
+/* ========= CLICK OUTSIDE TO CLOSE ========= */
+document.addEventListener('click', function(e) {
+  // Close menu when clicking outside
+  const menu = document.getElementById('menu');
+  const menuToggle = document.querySelector('.menu-toggle');
+  if (menu.classList.contains('active') && !menu.contains(e.target) && !menuToggle.contains(e.target)) {
+    menu.classList.remove('active');
+  }
+  
+  // Close settings when clicking outside panel
+  const settingsOverlay = document.getElementById('settingsOverlay');
+  const settingsPanel = settingsOverlay.querySelector('.settings-panel');
+  if (settingsOverlay.classList.contains('active') && e.target === settingsOverlay) {
+    closeSettings();
+  }
+  
+  // Close profile when clicking outside panel
+  const profileOverlay = document.getElementById('profileOverlay');
+  if (profileOverlay.classList.contains('active') && e.target === profileOverlay) {
+    closeProfile();
+  }
+  
+  // Cancel give up when clicking outside panel
+  const giveUpOverlay = document.getElementById('giveUpOverlay');
+  if (giveUpOverlay.classList.contains('active') && e.target === giveUpOverlay) {
+    cancelGiveUp();
+  }
+  
+  // Cancel undo when clicking outside panel
+  const undoOverlay = document.getElementById('undoOverlay');
+  if (undoOverlay.classList.contains('active') && e.target === undoOverlay) {
+    cancelUndo();
+  }
+});
+
+/* ========= SETTINGS TAB SWITCHING ========= */
+function switchSettingsTab(tabName) {
+  // Hide all sections
+  document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+  // Deactivate all tabs
+  document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+  
+  // Show selected section
+  const sectionId = 'settings' + tabName.charAt(0).toUpperCase() + tabName.slice(1);
+  document.getElementById(sectionId).classList.add('active');
+  
+  // Activate selected tab
+  event.target.classList.add('active');
+}
+
+/* ========= TARGET SYSTEM ========= */
+function showTargetOverlay() {
+  document.getElementById("targetSwingsInput").value = 0;
+  document.getElementById("targetRoundsInput").value = 0;
+  document.getElementById("targetBlocksInput").value = 0;
+  document.getElementById("targetOverlay").classList.add("active");
+}
+
+function closeTargetOverlay() {
+  document.getElementById("targetOverlay").classList.remove("active");
+}
+
+function skipTargets() {
+  // Set all targets to 0 and start
+  document.getElementById("targetSwingsInput").value = 0;
+  document.getElementById("targetRoundsInput").value = 0;
+  document.getElementById("targetBlocksInput").value = 0;
+  confirmTargets();
+}
+
+function confirmTargets() {
+  const swings = parseInt(document.getElementById("targetSwingsInput").value) || 0;
+  const rounds = parseInt(document.getElementById("targetRoundsInput").value) || 0;
+  const blocks = parseInt(document.getElementById("targetBlocksInput").value) || 0;
+  
+  state.targetSwings = Math.max(0, swings);
+  state.targetRounds = Math.max(0, rounds);
+  state.targetBlocks = Math.max(0, blocks);
+  state.targetsSet = true;
+  
+  closeTargetOverlay();
+  
+  // Now run the first block
+  snapshotState();
+  state.blockInCycle++;
+  updateBadges();
+
+  // Boss block roll for first block
+  if (Math.random() < bossBlockChance) {
+    // Show cycle start, then boss block
+    let html = createCycleStartHtml(state.cycle, { swings: state.targetSwings, rounds: state.targetRounds, blocks: state.targetBlocks });
+    setLogHtml(html);
+    startBossBlock();
+    return;
+  }
+
+  // Run normal first block
+  const isMaxCycle = shouldTriggerMaxPowerCycle();
+  let size = isMaxCycle ? rollMaxPowerCycleLength() : rollBlockSize();
+  const roundData = [];
+
+  for (let i = 1; i <= size; i++) {
+    const diff = isMaxCycle
+      ? { name: "MAX POWER", mult: 1.25 }
+      : rollDifficulty();
+
+    const multiplier = isMaxCycle ? 1.75 : diff.mult;
+    const swingCount = rollSwings(diff.name);
+
+    applyRoundGrowth(multiplier, isMaxCycle);
+    state.roundsInCycle++;
+    state.totalHits += swingCount;
+    
+    roundData.push({ difficulty: diff.name, swings: swingCount });
+    
+    switch (diff.name) {
+      case "Easy": state.hitsEasy += swingCount; break;
+      case "Medium": state.hitsMedium += swingCount; break;
+      case "Hard": state.hitsHard += swingCount; break;
+      case "Extreme": state.hitsExtreme += swingCount; break;
+      case "Full Force": state.hitsFullForce += swingCount; break;
+      case "MAX POWER": state.hitsMaxPower += swingCount; break;
+    }
+
+    state.momentumRoundsBuffer++;
+    if (state.momentumRoundsBuffer >= momentumRoundsPerStep) {
+      const gained = Math.floor(state.momentumRoundsBuffer / momentumRoundsPerStep);
+      state.momentumRoundsBuffer -= gained * momentumRoundsPerStep;
+      state.momentumLevel += gained;
+      state.momentumTotalGain += gained;
+      if (state.momentumLevel > state.momentumPeak) state.momentumPeak = state.momentumLevel;
+    }
+  }
+
+  if (size >= momentumBigBlockThreshold) {
+    state.momentumLevel += momentumBigBlockBonus;
+    state.momentumTotalGain += momentumBigBlockBonus;
+    if (state.momentumLevel > state.momentumPeak) state.momentumPeak = state.momentumLevel;
+  }
+  if (isMaxCycle) {
+    state.momentumLevel += momentumMaxCycleBonus;
+    state.momentumTotalGain += momentumMaxCycleBonus;
+    if (state.momentumLevel > state.momentumPeak) state.momentumPeak = state.momentumLevel;
+  }
+
+  // Generate visual HTML
+  let html = createCycleStartHtml(state.cycle, { swings: state.targetSwings, rounds: state.targetRounds, blocks: state.targetBlocks });
+  html += createBlockHtml(state.blockInCycle, roundData, isMaxCycle);
+  
+  updateBadges();
+  setLogHtml(html);
+}
+
+function checkTargetsMet() {
+  // If no targets set, always met
+  if (!state.targetsSet) return true;
+  if (state.targetSwings <= 0 && state.targetRounds <= 0 && state.targetBlocks <= 0) return true;
+  
+  // Check each target that is set
+  if (state.targetSwings > 0 && state.totalHits < state.targetSwings) return false;
+  if (state.targetRounds > 0 && state.roundsInCycle < state.targetRounds) return false;
+  if (state.targetBlocks > 0 && state.blockInCycle < state.targetBlocks) return false;
+  
+  return true;
+}
+
+function showTargetWarning() {
+  document.getElementById("targetWarningOverlay").classList.add("active");
+}
+
+function closeTargetWarning() {
+  document.getElementById("targetWarningOverlay").classList.remove("active");
+}
+
+function applyTargetNotMetPenalty() {
+  // Apply configured penalty to all Progress
+  state.fullCookie -= targetImDonePenalty;
+  state.halfCookie -= targetImDonePenalty;
+  state.lockIn -= targetImDonePenalty;
+  state.punishments.push(`Target not met penalty: -${targetImDonePenalty}% Progress (Block ${state.blockInCycle})`);
+}
+
+/* ========= GAME STATE ========= */
+const state = {
+  cycle: 1,
+  blockInCycle: 0,
+  roundsInCycle: 0,
+  exitAttempt: 0,
+  totalHits: 0,
+  hitsEasy: 0,
+  hitsMedium: 0,
+  hitsHard: 0,
+  hitsExtreme: 0,
+  hitsFullForce: 0,
+  hitsMaxPower: 0,
+
+  // Punishment & exit logs
+  punishments: [],
+  exitAttemptsLog: [],
+
+  // Momentum stats
+  momentumPeak: 0,
+  momentumTotalGain: 0,
+  momentumPunishLoss: 0,
+
+  // Boss block state
+  isBossBlock: false,
+  bossOccurredThisCycle: false,
+  bossPunishThisCycle: false,
+
+  fullCookie: 0.0,
+  halfCookie: 0.0,
+  lockIn: 0.0,
+
+  exitWeights: [
+    { end: 10, cont: 90 },
+    { end: 30, cont: 70 },
+    { end: 55, cont: 45 },
+    { end: 80, cont: 20 },
+    { end: 100, cont: 0 },
+  ],
+
+  inCycle: true,
+  cycleEnded: false,
+  lastSummary: null,
+  lastSnapshot: null,
+  preCycleSnapshot: null,  // Snapshot saved at cycle start for undo
+
+  // Momentum
+  momentumLevel: 0,
+  momentumRoundsBuffer: 0,
+
+  // Track last round index when "I'm done" was used
+  lastExitRound: 0,
+  
+  // Exit chain tracking
+  forcedBlockPending: false,    // True after failed exit, must do a block
+  canContinueExitChain: false,  // True after completing forced block
+
+  // Targets for current cycle
+  targetSwings: 0,
+  targetRounds: 0,
+  targetBlocks: 0,
+  targetsSet: false
+};
+
+// CONFIGURABLE VALUES
+let difficulties = [
+  { name: "Easy",       prob: 16.6667, mult: 0.00 },
+  { name: "Medium",     prob: 16.6667, mult: 0.25 },
+  { name: "Hard",       prob: 16.6667, mult: 0.50 },
+  { name: "Extreme",    prob: 16.6667, mult: 0.75 },
+  { name: "Full Force", prob: 16.6667, mult: 1.00 },
+  { name: "MAX POWER",  prob: 16.6667, mult: 1.25 }
+];
+
+// Block size configuration
+let blockRoundsMin = 1;           // Minimum rounds per block
+let blockRoundsMax = 20;          // Maximum rounds per block
+let blockBandWeights = [1, 1, 1, 1];  // Weights for each 25% band
+
+// legacy base values (kept for settings/save compatibility)
+let fullBaseGain = 0.06;
+let halfBaseGain = 0.10;
+let lockBaseDecrease = 0.08;
+
+let maxPowerCycleChance = 0.1; // percent
+let maxPowerBlockMin = 8;
+let maxPowerBlockMax = 20;
+let maxPowerMultiplier = 1.75;
+
+let bossBlockChance = 0.01;      // 1% chance per block
+let bossMinRounds = 20;
+let bossMaxRounds = 50;
+let bossCowardicePenalty = -100; // Progress set to this when quitting boss block
+
+// ========= EXIT CONFIGURATION =========
+let minRoundsBeforeExit = 5;       // Minimum rounds before "I'm done" can succeed
+
+// ========= PUNISHMENT CONFIGURATION =========
+let earlyExitFlatPenalty = 1;      // Flat % removed from each Progress stat
+let earlyExitPercentPenalty = 25;  // % of Progress removed after flat penalty
+let earlyExitWipeMomentum = true;  // Whether to wipe all momentum
+
+let giveUpPercentPenalty = 50;     // % of Progress removed (halved)
+let giveUpFlatPenalty = 3;         // Flat % removed after percent reduction
+
+let targetImDonePenalty = 1;       // Flat % removed when pressing I'm done before target met
+let targetGiveUpPenalty = 5;       // Extra flat % removed when giving up before target met
+
+// End-of-cycle roll configuration
+let cookieRollMin = 1;              // Minimum roll value for cookie outcome
+let cookieRollMax = 100;            // Maximum roll value for cookie outcome
+let cookieBandWeights = [25, 25, 25, 25];  // Weights for each 25% band
+
+// Unlock roll configuration  
+let lockRollMin = 1;                // Minimum roll value for lock outcome
+let lockRollMax = 100;              // Maximum roll value for lock outcome
+let lockBandWeights = [2, 6, 12, 80];     // Weights for each 25% band (heavily weighted to high = harder to escape)
+
+// ========= PER-ROUND CAPS & RNG FOR COOKIE / LOCK-IN =========
+
+// Base max change per single round
+let maxFullPerRound = 0.150;  // Full
+let maxHalfPerRound = 0.300;  // Ruined
+let maxLockPerRound = 0.300;  // Unlocked gain
+
+// Minimum per-round gains
+let minFullPerRound = 0.010;
+let minHalfPerRound = 0.010;
+let minLockPerRound = 0.010;
+
+// Band weight config for per-round RNG
+let bandWeightLow = 1;
+let bandWeightMed = 1;
+let bandWeightHigh = 1;
+let bandShiftPerMomentum = 0.5; // momentum shift per level
+
+// Momentum tuning config
+let momentumRoundsPerStep = 22;      // rounds for +1 momentum
+let momentumBigBlockThreshold = 16;   // blocks >= this count as "big"
+let momentumBigBlockBonus = 1;        // bonus momentum for big blocks
+let momentumMaxCycleBonus = 1;        // bonus for MAX POWER cycles
+
+let momentumCapPerLevel = 0.01;       // extra cap per momentum level (1%)
+let momentumCapMaxMult = 1.10;        // max cap multiplier (110%)
+
+let momentumEarlyDonePenalty = 2;    // how many momentum levels you lose on early "I'm done"
+let momentumGiveUpResetTo = 0;       // what momentum is set to on "Give up"
+
+// ========= SWING RANGES PER DIFFICULTY =========
+let swingRanges = {
+  easy:      { min: 10, max: 30 },
+  medium:    { min: 8,  max: 20 },
+  hard:      { min: 6,  max: 15 },
+  extreme:   { min: 4,  max: 10 },
+  fullForce: { min: 2,  max: 6 },
+  maxPower:  { min: 1,  max: 1 }   // Fixed at 1
+};
+
+// ========= BOSS BLOCK SETTINGS =========
+let bossSwingMultiplier = 5;        // Multiplier for swings during boss block
+
+// ========= SOFT SAVE SETTINGS =========
+let softSaveTimeoutMinutes = 60;    // Minutes before soft save expires
+
+// Random float in [min, max)
+function randRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+// Band selection with momentum (low/med/high)
+// Base weights: low=60, med=30, high=10
+// Momentum pushes from low → high
+function rollBandWithMomentum() {
+  // Base weights come from settings
+  let lowW = bandWeightLow;
+  let medW = bandWeightMed;
+  let highW = bandWeightHigh;
+
+  // Shift weight from low -> high based on momentum
+  const rawShift = bandShiftPerMomentum * state.momentumLevel;
+
+  // Don't let lowW drop below 1
+  const maxShiftFromLow = Math.max(0, lowW - 1);
+  const appliedShift = Math.min(rawShift, maxShiftFromLow);
+
+  lowW -= appliedShift;
+  highW += appliedShift;
+
+  // Safety: ensure all weights are at least 1
+  if (lowW < 1) lowW = 1;
+  if (medW < 1) medW = 1;
+  if (highW < 1) highW = 1;
+
+  const total = lowW + medW + highW;
+  let r = Math.random() * total;
+
+  if (r < lowW) return "low";
+  r -= lowW;
+  if (r < medW) return "med";
+  return "high";
+}
+
+// Full base gain: 0.001–0.150 with momentum-weighted bands
+function rollFullBaseGain() {
+  const band = rollBandWithMomentum();
+  let min = minFullPerRound;
+  let max = maxFullPerRound;
+  if (max <= min) {
+    // Degenerate config: fall back to a flat minimal gain
+    return Math.max(0, min);
+  }
+  const span = max - min;
+  const t1 = min + span / 3;
+  const t2 = min + (2 * span) / 3;
+
+  if (band === "low") {
+    return randRange(min, t1);
+  } else if (band === "med") {
+    return randRange(t1, t2);
+  } else {
+    return randRange(t2, max);
+  }
+}
+
+// Ruined base gain: 0.001–0.300 with momentum-weighted bands
+function rollHalfBaseGain() {
+  const band = rollBandWithMomentum();
+  let min = minHalfPerRound;
+  let max = maxHalfPerRound;
+  if (max <= min) {
+    return Math.max(0, min);
+  }
+  const span = max - min;
+  const t1 = min + span / 3;
+  const t2 = min + (2 * span) / 3;
+
+  if (band === "low") {
+    return randRange(min, t1);
+  } else if (band === "med") {
+    return randRange(t1, t2);
+  } else {
+    return randRange(t2, max);
+  }
+}
+
+// Unlocked base change (positive magnitude): 0.001–0.300 with momentum-weighted bands
+// We'll add this to lockIn (Unlocked).
+function rollLockBaseChange() {
+  const band = rollBandWithMomentum();
+  let min = minLockPerRound;
+  let max = maxLockPerRound;
+  if (max <= min) {
+    return Math.max(0, min);
+  }
+  const span = max - min;
+  const t1 = min + span / 3;
+  const t2 = min + (2 * span) / 3;
+
+  if (band === "low") {
+    return randRange(min, t1);
+  } else if (band === "med") {
+    return randRange(t1, t2);
+  } else {
+    return randRange(t2, max);
+  }
+}
+
+/* ========= UTILITIES ========= */
+function ri(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function weightedChoice(list) {
+  const total = list.reduce((sum, x) => sum + x.weight, 0);
+  let roll = Math.random() * total;
+  for (const item of list) {
+    if (roll < item.weight) return item;
+    roll -= item.weight;
+  }
+  return list[list.length - 1];
+}
+
+function rollDifficulty() {
+  let roll = Math.random() * 100;
+  for (const d of difficulties) {
+    if (roll < d.prob) return d;
+    roll -= d.prob;
+  }
+  return difficulties[difficulties.length - 1];
+}
+
+function rollBlockSize() {
+  // Calculate the total range
+  const range = blockRoundsMax - blockRoundsMin + 1;
+  const bandSize = range / 4;
+  
+  // Pick a band based on weights
+  const totalWeight = blockBandWeights.reduce((a, b) => a + b, 0);
+  if (totalWeight <= 0) return ri(blockRoundsMin, blockRoundsMax);
+  
+  let roll = Math.random() * totalWeight;
+  let bandIndex = 0;
+  for (let i = 0; i < blockBandWeights.length; i++) {
+    roll -= blockBandWeights[i];
+    if (roll <= 0) {
+      bandIndex = i;
+      break;
+    }
+  }
+  
+  // Calculate this band's min/max
+  const bandMin = Math.floor(blockRoundsMin + bandIndex * bandSize);
+  const bandMax = Math.floor(blockRoundsMin + (bandIndex + 1) * bandSize - 1);
+  
+  // Clamp to overall bounds
+  const clampedMin = Math.max(blockRoundsMin, bandMin);
+  const clampedMax = Math.min(blockRoundsMax, bandMax);
+  
+  return ri(clampedMin, clampedMax);
+}
+
+function shouldTriggerMaxPowerCycle() {
+  // maxPowerCycleChance is a percent
+  const roll = Math.random() * 100;
+  return roll < maxPowerCycleChance;
+}
+
+function rollMaxPowerCycleLength() {
+  return ri(maxPowerBlockMin, maxPowerBlockMax);
+}
+
+/* ========= GROWTH ========= */
+function applyRoundGrowth(multiplier, isMaxPowerCycle) {
+  // 1) Difficulty / cycle multiplier
+  let m = multiplier;
+  if (isMaxPowerCycle) m = maxPowerMultiplier;
+
+  // 2) RNG draws for this round (before difficulty)
+  const baseFull = rollFullBaseGain();   // 0.001–0.150
+  const baseHalf = rollHalfBaseGain();   // 0.001–0.300
+  const baseLock = rollLockBaseChange(); // 0.001–0.300
+
+  // 3) Scale by difficulty multiplier
+  let deltaFull = baseFull * m;
+  let deltaHalf = baseHalf * m;
+  let deltaLock = baseLock * m; // positive magnitude
+
+  // 4) Momentum-scaled caps
+  let capMult = 1 + momentumCapPerLevel * state.momentumLevel;
+  if (capMult > momentumCapMaxMult) capMult = momentumCapMaxMult;
+
+  const effMaxFull = maxFullPerRound * capMult;
+  const effMaxHalf = maxHalfPerRound * capMult;
+  const effMaxLock = maxLockPerRound * capMult;
+
+  if (deltaFull > effMaxFull) deltaFull = effMaxFull;
+  if (deltaHalf > effMaxHalf) deltaHalf = effMaxHalf;
+  if (deltaLock > effMaxLock) deltaLock = effMaxLock;
+
+  // 5) Apply to state: Full/Ruined/Unlocked go up
+  state.fullCookie += deltaFull;
+  state.halfCookie += deltaHalf;
+  state.lockIn     += deltaLock;
+}
+
+/* ========= LOGGING ========= */
+function setLog(text) {
+  const logElem = document.getElementById("log");
+  logElem.textContent = text;
+  logElem.scrollTop = logElem.scrollHeight;
+}
+
+function setLogHtml(html) {
+  const logElem = document.getElementById("log");
+  logElem.innerHTML = html;
+  logElem.scrollTop = logElem.scrollHeight;
+}
+
+function appendLogHtml(html) {
+  const logElem = document.getElementById("log");
+  logElem.innerHTML += html;
+  logElem.scrollTop = logElem.scrollHeight;
+}
+
+/* ========= VISUAL HELPERS ========= */
+function getDifficultyClass(name) {
+  const map = {
+    'Easy': 'easy',
+    'Medium': 'medium',
+    'Hard': 'hard',
+    'Extreme': 'extreme',
+    'Full Force': 'full-force',
+    'MAX POWER': 'max-power'
+  };
+  return map[name] || 'medium';
+}
+
+function createWelcomeMessage() {
+  return `<div class="game-message"><div class="icon">⚡</div><div class="title">Ready to Begin</div><div class="subtitle">Press "Next" to set targets and start Cycle 1</div></div>`;
+}
+
+function createCycleStartHtml(cycleNum, targets) {
+  let html = `<div class="cycle-start"><div class="cycle-number">Cycle ${cycleNum}</div><div class="cycle-label">Started</div>`;
+  
+  if (targets.swings > 0 || targets.rounds > 0 || targets.blocks > 0) {
+    html += `<div class="targets-display"><div class="targets-title">Targets Set</div><div class="target-chips">`;
+    if (targets.swings > 0) html += `<span class="target-chip">🎯 ${targets.swings} Swings</span>`;
+    if (targets.rounds > 0) html += `<span class="target-chip">🔄 ${targets.rounds} Rounds</span>`;
+    if (targets.blocks > 0) html += `<span class="target-chip">📦 ${targets.blocks} Blocks</span>`;
+    html += `</div></div>`;
+  }
+  
+  html += `</div>`;
+  return html;
+}
+
+function createBlockHtml(blockNum, rounds, isMaxPower) {
+  const cardClass = isMaxPower ? 'block-card max-power' : 'block-card';
+  
+  let html = `<div class="${cardClass}"><div class="block-body">`;
+  
+  rounds.forEach((round, idx) => {
+    html += `<div class="round-item"><div class="round-number">${idx + 1}</div><div class="round-content"><span class="difficulty-badge ${getDifficultyClass(round.difficulty)}">${round.difficulty}</span><span class="swing-count">💥 ${round.swings}</span></div></div>`;
+  });
+  
+  html += `</div></div>`;
+  return html;
+}
+
+function createBossBlockHtml(rounds) {
+  let html = `<div class="block-card boss-block"><div class="block-header"><div class="block-title">👹 BOSS BLOCK</div><div class="block-info">NO GAINS</div></div><div class="block-body">`;
+  
+  rounds.forEach((round, idx) => {
+    html += `<div class="round-item"><div class="round-number">${idx + 1}</div><div class="round-content"><span class="difficulty-badge max-power">MAX POWER</span><span class="swing-count">💥 ${round.swings}</span></div></div>`;
+  });
+  
+  html += `</div></div>`;
+  return html;
+}
+
+function createBossCompleteHtml() {
+  return `<div class="boss-complete"><div class="icon">🏆</div><div class="title">BOSS BLOCK SURVIVED</div><div class="subtitle">Press "Next" to continue safely</div></div>`;
+}
+
+function createStatusMessage(type, icon, text) {
+  return `<div class="status-message ${type}"><span class="icon">${icon}</span><span class="text">${text}</span></div>`;
+}
+
+function createExitResultHtml(result, attempt, detail) {
+  const cssClass = result === 'END' ? 'end' : 'continue';
+  const icon = result === 'END' ? '✅' : '🔄';
+  const text = result === 'END' ? 'Exit Successful!' : 'Must Continue...';
+  
+  return `<div class="exit-result ${cssClass}"><div class="result-icon">${icon}</div><div class="result-text">${text}</div><div class="result-detail">${detail}</div></div>`;
+}
+
+function appendLog(text) {
+  const logElem = document.getElementById("log");
+  logElem.textContent += "\n" + text;
+  logElem.scrollTop = logElem.scrollHeight;
+}
+
+function setBossWarning(active) {
+  const bar = document.getElementById("bossWarningBar");
+  if (!bar) return;
+  bar.style.display = active ? "block" : "none";
+}
+
+/* ========= BADGES (hidden) ========= */
+function updateBadges() {
+  document.getElementById("cycleBadge").textContent =
+    "Cycle: " + state.cycle;
+  document.getElementById("blockBadge").textContent =
+    "Blocks this cycle: " + state.blockInCycle;
+  document.getElementById("roundBadge").textContent =
+    "Rounds this cycle: " + state.roundsInCycle;
+  document.getElementById("exitBadge").textContent =
+    "Exit attempts: " + state.exitAttempt + " (hidden odds)";
+  document.getElementById("lockBadge").textContent = "Unlocked %: hidden";
+  document.getElementById("cookieBadge").textContent = "Cookie %: hidden";
+}
+
+/* ========= CORE FLOW ========= */
+function ensureCycleActive() {
+  if (!state.inCycle || state.cycleEnded) {
+    startNewCycle(true);
+  }
+}
+
+function snapshotState() {
+  const logEl = document.getElementById("log");
+  state.lastSnapshot = {
+    cycle: state.cycle,
+    blockInCycle: state.blockInCycle,
+    roundsInCycle: state.roundsInCycle,
+    exitAttempt: state.exitAttempt,
+    totalHits: state.totalHits,
+    hitsEasy: state.hitsEasy,
+    hitsMedium: state.hitsMedium,
+    hitsHard: state.hitsHard,
+    hitsExtreme: state.hitsExtreme,
+    hitsFullForce: state.hitsFullForce,
+    hitsMaxPower: state.hitsMaxPower,
+    fullCookie: state.fullCookie,
+    halfCookie: state.halfCookie,
+    lockIn: state.lockIn,
+    inCycle: state.inCycle,
+    cycleEnded: state.cycleEnded,
+    lastSummary: state.lastSummary,
+    logHtml: logEl ? logEl.innerHTML : '',
+    momentumLevel: state.momentumLevel,
+    momentumRoundsBuffer: state.momentumRoundsBuffer,
+    punishments: state.punishments.slice(),
+    exitAttemptsLog: state.exitAttemptsLog.slice(),
+    momentumPeak: state.momentumPeak,
+    momentumTotalGain: state.momentumTotalGain,
+    momentumPunishLoss: state.momentumPunishLoss,
+    lastExitRound: state.lastExitRound,
+    forcedBlockPending: state.forcedBlockPending,
+    canContinueExitChain: state.canContinueExitChain,
+    isBossBlock: state.isBossBlock,
+    bossOccurredThisCycle: state.bossOccurredThisCycle,
+    bossPunishThisCycle: state.bossPunishThisCycle,
+    targetSwings: state.targetSwings,
+    targetRounds: state.targetRounds,
+    targetBlocks: state.targetBlocks,
+    targetsSet: state.targetsSet
+  };
+}
+
+function restoreSnapshot() {
+  if (!state.lastSnapshot) {
+    setLogHtml(createStatusMessage('warning', '⚠️', 'No previous block to undo.'));
+    return;
+  }
+  if (state.cycleEnded) {
+    setLogHtml(createStatusMessage('warning', '⚠️', 'Cannot undo after cycle has ended.'));
+    return;
+  }
+
+  const s = state.lastSnapshot;
+  state.cycle = s.cycle;
+  state.blockInCycle = s.blockInCycle;
+  state.roundsInCycle = s.roundsInCycle;
+  state.exitAttempt = s.exitAttempt;
+  state.totalHits = s.totalHits || 0;
+  state.hitsEasy = s.hitsEasy || 0;
+  state.hitsMedium = s.hitsMedium || 0;
+  state.hitsHard = s.hitsHard || 0;
+  state.hitsExtreme = s.hitsExtreme || 0;
+  state.hitsFullForce = s.hitsFullForce || 0;
+  state.hitsMaxPower = s.hitsMaxPower || 0;
+  state.fullCookie = s.fullCookie;
+  state.halfCookie = s.halfCookie;
+  state.lockIn = s.lockIn;
+  state.inCycle = s.inCycle;
+  state.cycleEnded = s.cycleEnded;
+  state.lastSummary = s.lastSummary;
+  state.momentumLevel = s.momentumLevel || 0;
+  state.momentumRoundsBuffer = s.momentumRoundsBuffer || 0;
+  state.punishments = s.punishments || [];
+  state.exitAttemptsLog = s.exitAttemptsLog || [];
+  state.momentumPeak = s.momentumPeak || 0;
+  state.momentumTotalGain = s.momentumTotalGain || 0;
+  state.momentumPunishLoss = s.momentumPunishLoss || 0;
+  state.lastExitRound = s.lastExitRound || 0;
+  state.forcedBlockPending = s.forcedBlockPending || false;
+  state.canContinueExitChain = s.canContinueExitChain || false;
+  state.isBossBlock = s.isBossBlock || false;
+  state.bossOccurredThisCycle = s.bossOccurredThisCycle || false;
+  state.bossPunishThisCycle = s.bossPunishThisCycle || false;
+  state.targetSwings = s.targetSwings || 0;
+  state.targetRounds = s.targetRounds || 0;
+  state.targetBlocks = s.targetBlocks || 0;
+  state.targetsSet = s.targetsSet || false;
+  state.lastSnapshot = null;
+
+  // Restore visual state
+  const logEl = document.getElementById("log");
+  const undoMsg = createStatusMessage('info', '↩️', 'Last block undone.');
+  if (s.logHtml && logEl) {
+    logEl.innerHTML = undoMsg + s.logHtml;
+  } else {
+    logEl.innerHTML = undoMsg;
+  }
+  
+  setBossWarning(state.isBossBlock);
+  updateBadges();
+}
+
+function startNewCycle(fromSnapped) {
+  // Save pre-cycle snapshot for undo functionality
+  // This captures the state before the new cycle begins
+  if (fromSnapped && state.lastSummary) {
+    state.preCycleSnapshot = {
+      cycle: state.cycle,
+      fullCookie: state.lastSummary.nextFullCookie,
+      halfCookie: state.lastSummary.nextHalfCookie,
+      lockIn: state.lastSummary.nextLockIn,
+      lastSummary: JSON.parse(JSON.stringify(state.lastSummary)),
+      momentumLevel: state.momentumLevel,
+      momentumRoundsBuffer: state.momentumRoundsBuffer
+    };
+  } else {
+    state.preCycleSnapshot = null;
+  }
+
+  state.cycle += (fromSnapped ? 1 : 0);
+  state.blockInCycle = 0;
+  state.roundsInCycle = 0;
+  state.exitAttempt = 0;
+  state.totalHits = 0;
+  state.hitsEasy = 0;
+  state.hitsMedium = 0;
+  state.hitsHard = 0;
+  state.hitsExtreme = 0;
+  state.hitsFullForce = 0;
+  state.hitsMaxPower = 0;
+  state.inCycle = true;
+  state.cycleEnded = false;
+  state.lastSnapshot = null;
+  state.punishments = [];
+  state.exitAttemptsLog = [];
+  state.momentumPeak = 0;
+  state.momentumTotalGain = 0;
+  state.momentumPunishLoss = 0;
+
+  // reset momentum each cycle
+  state.momentumLevel = 0;
+  state.momentumRoundsBuffer = 0;
+  state.lastExitRound = 0;
+  state.forcedBlockPending = false;
+  state.canContinueExitChain = false;
+  state.isBossBlock = false;
+  state.bossOccurredThisCycle = false;
+  state.bossPunishThisCycle = false;
+  setBossWarning(false);
+
+  // Reset targets for new cycle
+  state.targetSwings = 0;
+  state.targetRounds = 0;
+  state.targetBlocks = 0;
+  state.targetsSet = false;
+
+  if (fromSnapped && state.lastSummary) {
+    state.fullCookie = state.lastSummary.nextFullCookie;
+    state.halfCookie = state.lastSummary.nextHalfCookie;
+    state.lockIn = state.lastSummary.nextLockIn;
+  } else {
+    state.fullCookie = 0.0;
+    state.halfCookie = 0.0;
+    state.lockIn = 0.0;
+  }
+
+  updateBadges();
+  
+  // Show visual ready message
+  setLogHtml(`<div class="game-message"><div class="icon">🎮</div><div class="title">Cycle ${state.cycle} Ready</div><div class="subtitle">Press "Next" to set targets and begin</div></div>`);
+}
+
+/* ========= ROUNDS / BLOCKS ========= */
+function startBossBlock() {
+  state.isBossBlock = true;
+  state.bossOccurredThisCycle = true;
+  setBossWarning(true);
+
+  const numRounds = ri(bossMinRounds, bossMaxRounds);
+  const rounds = [];
+
+  for (let i = 1; i <= numRounds; i++) {
+    const swings = rollSwings("MAX POWER") * bossSwingMultiplier;
+
+    // No gains at all during boss block: just swings, no cookie/lock/momentum updates.
+    state.roundsInCycle++;
+    state.totalHits += swings;
+    state.hitsMaxPower += swings;
+
+    rounds.push({ difficulty: "MAX POWER", swings: swings });
+  }
+
+  // Generate visual HTML
+  let html = createStatusMessage('danger', '⚠️', 'Gains are disabled during Boss Block. Survive to continue. Pressing "I\'m done" or "Give up" will corrupt your save!');
+  html += createBossBlockHtml(rounds);
+  html += createBossCompleteHtml();
+  
+  updateBadges();
+  setLogHtml(html);
+  
+  // Soft save after boss block
+  softSave();
+}
+
+function rollSwings(name) {
+  switch (name) {
+    case "Easy":       return ri(swingRanges.easy.min, swingRanges.easy.max);
+    case "Medium":     return ri(swingRanges.medium.min, swingRanges.medium.max);
+    case "Hard":       return ri(swingRanges.hard.min, swingRanges.hard.max);
+    case "Extreme":    return ri(swingRanges.extreme.min, swingRanges.extreme.max);
+    case "Full Force": return ri(swingRanges.fullForce.min, swingRanges.fullForce.max);
+    case "MAX POWER":  return ri(swingRanges.maxPower.min, swingRanges.maxPower.max);
+    default:           return ri(5, 15);
+  }
+}
+
+function nextBlock() {
+  ensureCycleActive();
+  
+  // Before first block, show target overlay if not set yet
+  if (state.blockInCycle === 0 && !state.targetsSet) {
+    showTargetOverlay();
+    return;
+  }
+  
+  // Exit chain reset logic:
+  // If player completed forced block and now presses Next (voluntary block), reset exit attempts
+  if (state.canContinueExitChain && !state.forcedBlockPending) {
+    state.exitAttempt = 0;
+    state.canContinueExitChain = false;
+  }
+  
+  // Track if this is a forced block (from failed exit)
+  const wasForced = state.forcedBlockPending;
+  state.forcedBlockPending = false;
+  
+  snapshotState();
+
+  // If we just finished a boss block, clear the flag and warning
+  if (state.isBossBlock) {
+    state.isBossBlock = false;
+    setBossWarning(false);
+  }
+
+  state.blockInCycle++;
+  updateBadges();
+
+  // Boss block roll (only if not already in/just finished a boss block)
+  if (Math.random() < bossBlockChance) {
+    // If this was forced block, still set canContinueExitChain after boss
+    if (wasForced) state.canContinueExitChain = true;
+    startBossBlock();
+    return;
+  }
+
+  const isMaxCycle = shouldTriggerMaxPowerCycle();
+  let size = isMaxCycle ? rollMaxPowerCycleLength() : rollBlockSize();
+  
+  // Collect round data for visual display
+  const rounds = [];
+
+  for (let i = 1; i <= size; i++) {
+    const diff = isMaxCycle
+      ? { name: "MAX POWER", mult: 1.25 }
+      : rollDifficulty();
+
+    const multiplier = isMaxCycle ? 1.75 : diff.mult;
+    const swings = rollSwings(diff.name);
+
+    applyRoundGrowth(multiplier, isMaxCycle);
+    state.roundsInCycle++;
+    state.totalHits += swings;
+    
+    rounds.push({ difficulty: diff.name, swings: swings });
+    
+    switch (diff.name) {
+      case "Easy":
+        state.hitsEasy += swings;
+        break;
+      case "Medium":
+        state.hitsMedium += swings;
+        break;
+      case "Hard":
+        state.hitsHard += swings;
+        break;
+      case "Extreme":
+        state.hitsExtreme += swings;
+        break;
+      case "Full Force":
+        state.hitsFullForce += swings;
+        break;
+      case "MAX POWER":
+        state.hitsMaxPower += swings;
+        break;
+      default:
+        break;
+    }
+
+    // Momentum: buffered gain based on configured rounds-per-step
+    state.momentumRoundsBuffer++;
+    if (state.momentumRoundsBuffer >= momentumRoundsPerStep) {
+      const gained = Math.floor(state.momentumRoundsBuffer / momentumRoundsPerStep);
+      state.momentumRoundsBuffer -= gained * momentumRoundsPerStep;
+      state.momentumLevel += gained;
+      state.momentumTotalGain += gained;
+      if (state.momentumLevel > state.momentumPeak) state.momentumPeak = state.momentumLevel;
+    }
+  }
+
+  // Momentum bonuses per block
+  if (size >= momentumBigBlockThreshold) {
+    state.momentumLevel += momentumBigBlockBonus;
+    state.momentumTotalGain += momentumBigBlockBonus;
+    if (state.momentumLevel > state.momentumPeak) state.momentumPeak = state.momentumLevel;
+  }
+  if (isMaxCycle) {
+    state.momentumLevel += momentumMaxCycleBonus;
+    state.momentumTotalGain += momentumMaxCycleBonus;
+    if (state.momentumLevel > state.momentumPeak) state.momentumPeak = state.momentumLevel;
+  }
+  
+  // If this was a forced block (from failed exit), player can now continue exit chain
+  if (wasForced) {
+    state.canContinueExitChain = true;
+  }
+
+  // Generate visual HTML
+  const blockHtml = createBlockHtml(state.blockInCycle, rounds, isMaxCycle);
+  setLogHtml(blockHtml);
+  
+  updateBadges();
+  
+  // Soft save after each block
+  softSave();
+}
+
+/* ========= I'M DONE ========= */
+function pressImDone() {
+  // Boss punishment: pressing I'm done during a Boss Block corrupts the save
+  if (state.isBossBlock) {
+    corruptSaveFile();
+    return;
+  }
+
+  // If cycle is over, don't restart or advance anything here
+  if (!state.inCycle || state.cycleEnded) {
+    setLogHtml(createStatusMessage('info', 'ℹ️', 'Cycle already finished. Press "Next" to start a new one.'));
+    return;
+  }
+
+  ensureCycleActive();
+
+  // Anti-spam: you must have completed at least one more round since last exit attempt
+  if (state.roundsInCycle === state.lastExitRound) {
+    setLogHtml(createStatusMessage('warning', '⚠️', 'No new block since last attempt. Press "Next" to do another block first.'));
+    return;
+  }
+
+  // Check if targets are met - if not, show warning and apply penalty
+  if (!checkTargetsMet()) {
+    applyTargetNotMetPenalty();
+    showTargetWarning();
+    return;
+  }
+
+  // Early penalty still applies if fewer than minimum rounds done
+  if (state.roundsInCycle < minRoundsBeforeExit) {
+    state.lastExitRound = state.roundsInCycle;
+    applyEarlyImDonePenalty();
+    return;
+  }
+
+  // Player is continuing exit chain (pressed I'm done after forced block)
+  // Clear the flag so next voluntary block will reset attempts
+  state.canContinueExitChain = false;
+
+  state.exitAttempt++;
+  updateBadges();
+
+  const idx = Math.min(state.exitAttempt - 1, state.exitWeights.length - 1);
+  const weights = state.exitWeights[idx];
+  const roll = ri(1, 100);
+  const ends = roll <= weights.end;
+
+  // Record the round count at which this attempt happened
+  state.lastExitRound = state.roundsInCycle;
+  state.exitAttemptsLog.push({ attempt: state.exitAttempt, roll, result: ends ? 'END' : 'CONTINUE' });
+
+  if (ends) {
+    const exitHtml = createExitResultHtml('END', state.exitAttempt, `Attempt #${state.exitAttempt} — You escaped!`);
+    setLogHtml(exitHtml);
+    endCycle("normal-exit");
+    return;
+  }
+
+  // Exit failed - player must do a forced block before trying again
+  state.forcedBlockPending = true;
+  
+  const exitHtml = createExitResultHtml('CONTINUE', state.exitAttempt, `Attempt #${state.exitAttempt} — The cycle continues...`);
+  const nextMsg = createStatusMessage('info', '➡️', 'Press "Next" to continue the cycle.');
+  setLogHtml(exitHtml + nextMsg);
+  
+  // Soft save after exit attempt
+  softSave();
+}
+
+
+function applyEarlyImDonePenalty() {
+  // Base percentage penalties (all stats decrease as punishment)
+  state.fullCookie -= earlyExitFlatPenalty;
+  state.halfCookie -= earlyExitFlatPenalty;
+  state.lockIn -= earlyExitFlatPenalty;
+
+  // Remove configured % of progress
+  const keepPercent = (100 - earlyExitPercentPenalty) / 100;
+  const losePercent = 1 + (earlyExitPercentPenalty / 100);
+  
+  if (state.fullCookie >= 0) {
+    state.fullCookie *= keepPercent;
+  } else {
+    state.fullCookie *= losePercent; // Make more negative
+  }
+  if (state.halfCookie >= 0) {
+    state.halfCookie *= keepPercent;
+  } else {
+    state.halfCookie *= losePercent;
+  }
+  if (state.lockIn >= 0) {
+    state.lockIn *= keepPercent;
+  } else {
+    state.lockIn *= losePercent;
+  }
+
+  // Momentum punishment
+  if (earlyExitWipeMomentum) {
+    state.momentumPunishLoss += state.momentumLevel;
+    state.momentumLevel = 0;
+    state.momentumRoundsBuffer = 0;
+    state.punishments.push(`Momentum wiped due to punishment (Block ${state.blockInCycle})`);
+  }
+  state.punishments.push(`Early exit penalty applied (Block ${state.blockInCycle})`);
+
+  // Show visual penalty message then continue to next block
+  let penaltyText = `Too early! Need ${minRoundsBeforeExit} rounds to exit (you have ${state.roundsInCycle}). -${earlyExitFlatPenalty}% Progress, then ${earlyExitPercentPenalty}% removed.`;
+  if (earlyExitWipeMomentum) penaltyText += ' Momentum wiped.';
+  
+  const penaltyHtml = createStatusMessage('penalty', '💥', penaltyText);
+  const continueHtml = createStatusMessage('info', '➡️', 'Starting next block...');
+  setLogHtml(penaltyHtml + continueHtml);
+  
+  // Short delay then next block
+  setTimeout(() => nextBlock(), 100);
+}
+
+/* ========= GIVE UP ========= */
+let giveUpCountdownInterval = null;
+
+function pressGiveUp() {
+  // Boss punishment: pressing Give Up during a Boss Block corrupts the save
+  if (state.isBossBlock) {
+    corruptSaveFile();
+    return;
+  }
+
+  if (!state.inCycle) {
+    appendLog("\n[Give Up] No active cycle.");
+    return;
+  }
+
+  // Show confirmation overlay with countdown
+  showGiveUpConfirmation();
+}
+
+function showGiveUpConfirmation() {
+  const overlay = document.getElementById("giveUpOverlay");
+  const btn = document.getElementById("confirmGiveUpBtn");
+  const countdown = document.getElementById("giveUpCountdown");
+  
+  overlay.classList.add("active");
+  btn.disabled = true;
+  
+  let seconds = 5;
+  countdown.textContent = `Wait ${seconds}s`;
+  
+  giveUpCountdownInterval = setInterval(() => {
+    seconds--;
+    if (seconds > 0) {
+      countdown.textContent = `Wait ${seconds}s`;
+    } else {
+      clearInterval(giveUpCountdownInterval);
+      giveUpCountdownInterval = null;
+      countdown.textContent = "Yes, Give Up";
+      btn.disabled = false;
+    }
+  }, 1000);
+}
+
+function cancelGiveUp() {
+  const overlay = document.getElementById("giveUpOverlay");
+  overlay.classList.remove("active");
+  
+  if (giveUpCountdownInterval) {
+    clearInterval(giveUpCountdownInterval);
+    giveUpCountdownInterval = null;
+  }
+}
+
+function confirmGiveUp() {
+  const overlay = document.getElementById("giveUpOverlay");
+  overlay.classList.remove("active");
+  
+  if (giveUpCountdownInterval) {
+    clearInterval(giveUpCountdownInterval);
+    giveUpCountdownInterval = null;
+  }
+
+  // Now execute the actual give up logic
+  executeGiveUp();
+}
+
+function executeGiveUp() {
+  ensureCycleActive();
+
+  // Check if targets not met - extra penalty
+  let targetPenaltyApplied = false;
+  if (!checkTargetsMet()) {
+    state.fullCookie -= targetGiveUpPenalty;
+    state.halfCookie -= targetGiveUpPenalty;
+    state.lockIn -= targetGiveUpPenalty;
+    state.punishments.push(`Target not met on Give Up: -${targetGiveUpPenalty}% Progress (Block ${state.blockInCycle})`);
+    targetPenaltyApplied = true;
+  }
+
+  // Apply configured percentage reduction
+  const keepPercent = (100 - giveUpPercentPenalty) / 100;
+  const losePercent = 1 + (giveUpPercentPenalty / 100);
+  
+  if (state.fullCookie >= 0) {
+    state.fullCookie *= keepPercent;
+  } else {
+    state.fullCookie *= losePercent;
+  }
+  if (state.halfCookie >= 0) {
+    state.halfCookie *= keepPercent;
+  } else {
+    state.halfCookie *= losePercent;
+  }
+  if (state.lockIn >= 0) {
+    state.lockIn *= keepPercent;
+  } else {
+    state.lockIn *= losePercent;
+  }
+
+  // Additional flat penalties
+  state.fullCookie -= giveUpFlatPenalty;
+  state.halfCookie -= giveUpFlatPenalty;
+  state.lockIn -= giveUpFlatPenalty;
+
+  // "I give up" resets momentum
+  state.momentumPunishLoss += state.momentumLevel;
+  state.momentumLevel = momentumGiveUpResetTo;
+  state.momentumRoundsBuffer = 0;
+  state.punishments.push(`Give Up applied (Block ${state.blockInCycle})`);
+  state.punishments.push(`Momentum set to ${momentumGiveUpResetTo} (Block ${state.blockInCycle})`);
+
+  let log =
+    `"I give up" triggered.\n` +
+    (targetPenaltyApplied ? `Target not met penalty: -${targetGiveUpPenalty}% Progress.\n` : ``) +
+    `Progress reduced by ${giveUpPercentPenalty}%, then -${giveUpFlatPenalty}% flat.\n` +
+    `Momentum set to ${momentumGiveUpResetTo}.\n` +
+    `Cycle will now end with punishment.\n`;
+  setLog(log);
+  endCycle("give-up");
+}
+
+/* ========= END OF CYCLE ========= */
+function endCycle(reason) {
+  state.inCycle = false;
+  state.cycleEnded = true;
+  state.isBossBlock = false;
+  setBossWarning(false);
+
+  const summary = produceEndOfCycleSummary(reason);
+  state.lastSummary = summary;
+  state.lastSnapshot = null;
+
+  // Show visual summary overlay
+  showCycleSummary(reason, summary);
+  
+  updateBadges();
+  
+  // Hard save at end of cycle (permanent checkpoint)
+  hardSave({ silent: true });
+}
+
+function showCycleSummary(reason, summary) {
+  const overlay = document.getElementById("summaryOverlay");
+  const header = document.getElementById("summaryHeader");
+  
+  // Set header based on reason
+  document.getElementById("summaryTitle").textContent = `Cycle ${state.cycle} Complete`;
+  
+  let subtitleText = "Successfully exited";
+  header.className = "summary-header";
+  
+  if (reason === "give-up") {
+    subtitleText = "You gave up";
+    header.classList.add("give-up");
+  } else if (state.bossPunishThisCycle) {
+    subtitleText = "Corrupted by cowardice";
+    header.classList.add("boss-fail");
+  }
+  
+  document.getElementById("summarySubtitle").textContent = subtitleText;
+  
+  // Targets section
+  const targetsSection = document.getElementById("summaryTargets");
+  const targetsContent = document.getElementById("summaryTargetsContent");
+  
+  if (state.targetsSet && (state.targetSwings > 0 || state.targetRounds > 0 || state.targetBlocks > 0)) {
+    targetsSection.style.display = "block";
+    let targetsHtml = "";
+    
+    if (state.targetSwings > 0) {
+      const met = state.totalHits >= state.targetSwings;
+      targetsHtml += `<div class="summary-row">
+        <span class="label">Swings Target: ${state.targetSwings}</span>
+        <span class="target-check">
+          <span class="icon ${met ? 'met' : 'missed'}">${met ? '✓' : '✗'}</span>
+          <span class="value">${state.totalHits}</span>
+        </span>
+      </div>`;
+    }
+    if (state.targetRounds > 0) {
+      const met = state.roundsInCycle >= state.targetRounds;
+      targetsHtml += `<div class="summary-row">
+        <span class="label">Rounds Target: ${state.targetRounds}</span>
+        <span class="target-check">
+          <span class="icon ${met ? 'met' : 'missed'}">${met ? '✓' : '✗'}</span>
+          <span class="value">${state.roundsInCycle}</span>
+        </span>
+      </div>`;
+    }
+    if (state.targetBlocks > 0) {
+      const met = state.blockInCycle >= state.targetBlocks;
+      targetsHtml += `<div class="summary-row">
+        <span class="label">Blocks Target: ${state.targetBlocks}</span>
+        <span class="target-check">
+          <span class="icon ${met ? 'met' : 'missed'}">${met ? '✓' : '✗'}</span>
+          <span class="value">${state.blockInCycle}</span>
+        </span>
+      </div>`;
+    }
+    
+    targetsContent.innerHTML = targetsHtml;
+  } else {
+    targetsSection.style.display = "none";
+  }
+  
+  // Activity section
+  document.getElementById("sumBlocks").textContent = state.blockInCycle;
+  document.getElementById("sumRounds").textContent = state.roundsInCycle;
+  document.getElementById("sumTotalSwings").textContent = state.totalHits;
+  
+  // Swing breakdown
+  const swingBreakdown = document.getElementById("sumSwingBreakdown");
+  swingBreakdown.innerHTML = `
+    <div class="swing-item"><span class="name">Easy</span><span class="count">${state.hitsEasy}</span></div>
+    <div class="swing-item"><span class="name">Medium</span><span class="count">${state.hitsMedium}</span></div>
+    <div class="swing-item"><span class="name">Hard</span><span class="count">${state.hitsHard}</span></div>
+    <div class="swing-item"><span class="name">Extreme</span><span class="count">${state.hitsExtreme}</span></div>
+    <div class="swing-item"><span class="name">Full Force</span><span class="count">${state.hitsFullForce}</span></div>
+    <div class="swing-item"><span class="name">MAX POWER</span><span class="count">${state.hitsMaxPower}</span></div>
+  `;
+  
+  // Exit attempts
+  document.getElementById("sumExitAttempts").textContent = state.exitAttempt;
+  
+  const success = state.exitAttemptsLog.find(a => a.result === 'END');
+  if (reason === "give-up") {
+    document.getElementById("sumExitResult").textContent = "Gave up";
+    document.getElementById("sumExitResult").className = "value negative";
+  } else if (success) {
+    document.getElementById("sumExitResult").textContent = `Escaped on attempt #${success.attempt}`;
+    document.getElementById("sumExitResult").className = "value positive";
+  } else {
+    document.getElementById("sumExitResult").textContent = "No successful exit";
+    document.getElementById("sumExitResult").className = "value";
+  }
+  
+  // Momentum
+  document.getElementById("sumMomentumPeak").textContent = state.momentumPeak;
+  document.getElementById("sumMomentumGain").textContent = `+${state.momentumTotalGain}`;
+  document.getElementById("sumMomentumLoss").textContent = `-${state.momentumPunishLoss}`;
+  
+  // Punishments section
+  const punishSection = document.getElementById("summaryPunishments");
+  const punishContent = document.getElementById("summaryPunishmentsContent");
+  
+  if (state.punishments && state.punishments.length > 0) {
+    punishSection.style.display = "block";
+    let punishHtml = "";
+    state.punishments.forEach(p => {
+      punishHtml += `<div class="punishment-item">${p}</div>`;
+    });
+    punishContent.innerHTML = punishHtml;
+  } else {
+    punishSection.style.display = "none";
+  }
+  
+  // Boss section
+  const bossSection = document.getElementById("summaryBoss");
+  const bossContent = document.getElementById("summaryBossContent");
+  
+  if (state.bossOccurredThisCycle) {
+    bossSection.style.display = "block";
+    if (state.bossPunishThisCycle) {
+      bossContent.innerHTML = `<div class="punishment-item">Cowardice before the Boss — All progress set to ${bossCowardicePenalty}%</div>`;
+    } else {
+      bossContent.innerHTML = `<div class="summary-row"><span class="label">Status</span><span class="value positive">Survived!</span></div>`;
+    }
+  } else {
+    bossSection.style.display = "none";
+  }
+  
+  // Progress section
+  const fullPct = Math.max(0, Math.min(100, summary.rawFull));
+  const ruinedPct = Math.max(0, Math.min(100, summary.rawHalf));
+  const unlockedPct = Math.max(0, Math.min(100, summary.rawLock));
+  
+  document.getElementById("sumFullValue").textContent = `${summary.rawFull.toFixed(1)}%`;
+  document.getElementById("sumFullBar").style.width = `${fullPct}%`;
+  
+  document.getElementById("sumRuinedValue").textContent = `${summary.rawHalf.toFixed(1)}%`;
+  document.getElementById("sumRuinedBar").style.width = `${ruinedPct}%`;
+  
+  document.getElementById("sumUnlockedValue").textContent = `${summary.rawLock.toFixed(1)}%`;
+  document.getElementById("sumUnlockedBar").style.width = `${unlockedPct}%`;
+  
+  // Outcome text
+  const fullOutcome = document.getElementById("sumFullOutcome");
+  const ruinedOutcome = document.getElementById("sumRuinedOutcome");
+  const unlockedOutcome = document.getElementById("sumUnlockedOutcome");
+  
+  if (summary.cookieOutcome === "Full") {
+    fullOutcome.textContent = "🎯 HIT! Reset to 0% next cycle";
+    fullOutcome.className = "progress-outcome hit";
+    ruinedOutcome.textContent = "Not hit this cycle";
+    ruinedOutcome.className = "progress-outcome";
+  } else if (summary.cookieOutcome === "Ruined") {
+    fullOutcome.textContent = "Not hit this cycle";
+    fullOutcome.className = "progress-outcome";
+    ruinedOutcome.textContent = "🎯 HIT! Reset to 0% next cycle";
+    ruinedOutcome.className = "progress-outcome hit";
+  } else {
+    fullOutcome.textContent = "Not hit — keeps building";
+    fullOutcome.className = "progress-outcome";
+    ruinedOutcome.textContent = "Not hit — keeps building";
+    ruinedOutcome.className = "progress-outcome";
+  }
+  
+  if (summary.lockOutcome === "You get to unlock") {
+    unlockedOutcome.textContent = "🔓 Escaped! Reset to 0%";
+    unlockedOutcome.className = "progress-outcome success";
+  } else if (summary.lockOutcome === "Gotta stay locked in") {
+    unlockedOutcome.textContent = "🔒 Stuck locked — bad progress kept";
+    unlockedOutcome.className = "progress-outcome hit";
+  } else {
+    unlockedOutcome.textContent = "No roll needed";
+    unlockedOutcome.className = "progress-outcome";
+  }
+  
+  // Next cycle values
+  document.getElementById("sumNextFull").textContent = `${summary.nextFullCookie}%`;
+  document.getElementById("sumNextRuined").textContent = `${summary.nextHalfCookie}%`;
+  document.getElementById("sumNextUnlocked").textContent = `${summary.nextLockIn}%`;
+  
+  // Show overlay
+  overlay.classList.add("active");
+  
+  // Also update the log with a brief message
+  setLog(`Cycle ${state.cycle} complete. View summary above.`);
+}
+
+function closeSummaryAndContinue() {
+  document.getElementById("summaryOverlay").classList.remove("active");
+  
+  // Prepare for next cycle - show visual ready message
+  setLogHtml(`<div class="game-message"><div class="icon">✨</div><div class="title">Cycle ${state.cycle} Complete</div><div class="subtitle">Press "Next" to begin Cycle ${state.cycle + 1}</div></div>`);
+}
+
+/* ========= UNDO CYCLE CONFIRMATION ========= */
+let undoCountdownInterval = null;
+
+function showUndoConfirmation() {
+  if (!state.preCycleSnapshot) {
+    alert("No cycle to undo. This is the first cycle or you've already undone.");
+    return;
+  }
+  
+  // Close the popout menu if open
+  document.getElementById("menu").classList.remove("active");
+  
+  const overlay = document.getElementById("undoOverlay");
+  const btn = document.getElementById("confirmUndoBtn");
+  const countdown = document.getElementById("undoCountdown");
+  
+  overlay.classList.add("active");
+  btn.disabled = true;
+  
+  let seconds = 5;
+  countdown.textContent = `Wait ${seconds}s`;
+  
+  undoCountdownInterval = setInterval(() => {
+    seconds--;
+    if (seconds > 0) {
+      countdown.textContent = `Wait ${seconds}s`;
+    } else {
+      clearInterval(undoCountdownInterval);
+      undoCountdownInterval = null;
+      countdown.textContent = "Yes, Undo";
+      btn.disabled = false;
+    }
+  }, 1000);
+}
+
+function cancelUndo() {
+  const overlay = document.getElementById("undoOverlay");
+  overlay.classList.remove("active");
+  
+  if (undoCountdownInterval) {
+    clearInterval(undoCountdownInterval);
+    undoCountdownInterval = null;
+  }
+}
+
+function confirmUndo() {
+  const overlay = document.getElementById("undoOverlay");
+  overlay.classList.remove("active");
+  
+  if (undoCountdownInterval) {
+    clearInterval(undoCountdownInterval);
+    undoCountdownInterval = null;
+  }
+  
+  // Execute the actual undo
+  undoEntireCycle();
+}
+
+function undoEntireCycle() {
+  if (!state.preCycleSnapshot) {
+    appendLog("\n[Undo] No previous cycle state available to restore.");
+    return;
+  }
+  
+  const snap = state.preCycleSnapshot;
+  
+  // Restore to the state before this cycle was played
+  state.cycle = snap.cycle;
+  state.fullCookie = snap.fullCookie;
+  state.halfCookie = snap.halfCookie;
+  state.lockIn = snap.lockIn;
+  state.lastSummary = snap.lastSummary;
+  state.momentumLevel = snap.momentumLevel || 0;
+  state.momentumRoundsBuffer = snap.momentumRoundsBuffer || 0;
+  
+  // Reset cycle state
+  state.blockInCycle = 0;
+  state.roundsInCycle = 0;
+  state.exitAttempt = 0;
+  state.totalHits = 0;
+  state.hitsEasy = 0;
+  state.hitsMedium = 0;
+  state.hitsHard = 0;
+  state.hitsExtreme = 0;
+  state.hitsFullForce = 0;
+  state.hitsMaxPower = 0;
+  state.inCycle = false;
+  state.cycleEnded = true;
+  state.lastSnapshot = null;
+  state.punishments = [];
+  state.exitAttemptsLog = [];
+  state.momentumPeak = 0;
+  state.momentumTotalGain = 0;
+  state.momentumPunishLoss = 0;
+  state.lastExitRound = 0;
+  state.forcedBlockPending = false;
+  state.canContinueExitChain = false;
+  state.isBossBlock = false;
+  state.bossOccurredThisCycle = false;
+  state.bossPunishThisCycle = false;
+  state.targetSwings = 0;
+  state.targetRounds = 0;
+  state.targetBlocks = 0;
+  state.targetsSet = false;
+  
+  setBossWarning(false);
+  state.preCycleSnapshot = null;  // Clear so we can't undo twice
+  
+  // Close current summary and show previous summary
+  document.getElementById("summaryOverlay").classList.remove("active");
+  
+  // Show the previous cycle's summary
+  if (state.lastSummary) {
+    showCycleSummary(state.lastSummary.reason || "normal", state.lastSummary);
+  } else {
+    // No previous summary, just show ready message
+    setLogHtml(`<div class="game-message"><div class="icon">↩️</div><div class="title">Cycle Undone</div><div class="subtitle">Returned to state before Cycle ${state.cycle + 1}</div></div>`);
+  }
+  
+  updateBadges();
+  hardSave({ silent: true });
+}
+
+function produceEndOfCycleSummary(reason) {
+  const rawFull = state.fullCookie;
+  const rawHalf = state.halfCookie;
+  const rawLock = state.lockIn;
+
+  // Snap all chances down to 0.1% steps
+  const snappedFull = Math.floor(rawFull * 10) / 10;
+  const snappedHalf = Math.floor(rawHalf * 10) / 10;
+  let snappedLock = Math.floor(rawLock * 10) / 10;
+
+  const cookieResult = rollCookieOutcome(snappedFull, snappedHalf);
+
+  let lockRollResult = "Not rolled (no outcome hit)";
+  if (cookieResult === "Full" || cookieResult === "Ruined") {
+    lockRollResult = rollLockInOutcome(rawLock);
+  }
+
+  let nextFullRaw = rawFull;
+  let nextHalfRaw = rawHalf;
+  let nextLockRaw = rawLock;
+
+  if (cookieResult === "Full") {
+    nextFullRaw = 0.0;
+    try { state.punishments.push(`Full hit → FC reset to 0% (Block ${state.blockInCycle})`); } catch(e){}
+  } else if (cookieResult === "Ruined") {
+    nextHalfRaw = 0.0;
+    try { state.punishments.push(`Ruined hit → HC reset to 0% (Block ${state.blockInCycle})`); } catch(e){}
+  }
+
+  if (cookieResult === "Full" || cookieResult === "Ruined") {
+    if (lockRollResult === "Gotta stay locked in") {
+      nextLockRaw = rawLock; // Keep bad progress - this is a punishment
+      try { state.punishments.push(`Stayed locked in → stuck with ${rawLock.toFixed(1)}% Unlocked (Block ${state.blockInCycle})`); } catch(e){}
+    } else if (lockRollResult === "You get to unlock") {
+      nextLockRaw = 0.0; // Escaped! This is good, not a punishment
+    }
+  }
+
+  const nextFullCookie = Math.floor(nextFullRaw * 10) / 10;
+  const nextHalfCookie = Math.floor(nextHalfRaw * 10) / 10;
+  const nextLockIn = Math.floor(nextLockRaw * 10) / 10;
+
+  return {
+    rawFull,
+    rawHalf,
+    rawLock,
+    nextFullCookie,
+    nextHalfCookie,
+    nextLockIn,
+    cookieOutcome: cookieResult,
+    lockOutcome: lockRollResult,
+    reason
+  };
+}
+
+/* ========= COOKIE / LOCK-IN ROLLS ========= */
+// Helper function for band-based rolling
+function rollWithBands(rangeMin, rangeMax, bandWeights) {
+  const range = rangeMax - rangeMin + 1;
+  const bandSize = range / 4;
+  
+  // Pick a band based on weights
+  const totalWeight = bandWeights.reduce((a, b) => a + b, 0);
+  if (totalWeight <= 0) return ri(rangeMin, rangeMax);
+  
+  const bandsRoll = Math.random() * totalWeight;
+  let bandIndex = 0;
+  let cumulative = 0;
+  for (let i = 0; i < bandWeights.length; i++) {
+    cumulative += bandWeights[i];
+    if (bandsRoll <= cumulative) {
+      bandIndex = i;
+      break;
+    }
+  }
+  
+  // Calculate this band's min/max
+  const bandMin = Math.floor(rangeMin + bandIndex * bandSize);
+  const bandMax = Math.floor(rangeMin + (bandIndex + 1) * bandSize - 1);
+  
+  // Clamp to overall bounds
+  const clampedMin = Math.max(rangeMin, bandMin);
+  const clampedMax = Math.min(rangeMax, Math.max(bandMin, bandMax));
+  
+  return ri(clampedMin, clampedMax);
+}
+
+function rollCookieOutcome(fullSnap, halfSnap) {
+  const fullChance = Math.max(0, fullSnap);
+  const halfChance = Math.max(0, halfSnap);
+  let totalChance = fullChance + halfChance;
+
+  if (totalChance <= 0) return "No hit (0% total chance)";
+
+  let f = fullChance;
+  let h = halfChance;
+  if (totalChance > 100) {
+    const factor = 100 / totalChance;
+    f = Math.floor(fullChance * factor);
+    h = Math.floor(halfChance * factor);
+  }
+
+  const roll = rollWithBands(cookieRollMin, cookieRollMax, cookieBandWeights);
+  
+  // Scale f and h to the roll range
+  const rollRange = cookieRollMax - cookieRollMin + 1;
+  const scaledF = (f / 100) * rollRange + cookieRollMin - 1;
+  const scaledH = (h / 100) * rollRange;
+
+  if (roll <= scaledF) return "Full";
+  if (roll <= scaledF + scaledH) return "Ruined";
+  return "No hit";
+}
+
+function rollLockInOutcome(rawLock) {
+  let eff;
+  if (rawLock >= 99.001) {
+    eff = 100;
+  } else if (rawLock >= 98.0) {
+    eff = 99;
+  } else {
+    eff = Math.ceil(rawLock);
+  }
+  if (eff < 0) eff = 0;
+  if (eff > 100) eff = 100;
+
+  const roll = rollWithBands(lockRollMin, lockRollMax, lockBandWeights);
+  
+  // Scale eff to the roll range
+  const rollRange = lockRollMax - lockRollMin + 1;
+  const scaledEff = (eff / 100) * rollRange + lockRollMin - 1;
+
+  if (roll <= scaledEff) return "You get to unlock";
+  return "Gotta stay locked in";
+}
+
+/* ========= REVEAL / UNDO / RESET / SAVE / LOAD ========= */
+function pressReveal() {
+  if (!state.cycleEnded || !state.lastSummary) {
+    appendLog("\n[Reveal] No finished cycle to reveal yet.");
+    return;
+  }
+  const s = state.lastSummary;
+  let log =
+    `=== REVEAL: CYCLE ${state.cycle} INTERNAL STATS ===\n` +
+    `Raw Full: ${s.rawFull.toFixed(3)}%\n` +
+    `Raw Ruined: ${s.rawHalf.toFixed(3)}%\n` +
+    `Raw Unlocked: ${s.rawLock.toFixed(3)}%\n\n` +
+    `Next cycle starting values:\n` +
+    `  Full: ${s.nextFullCookie}%\n` +
+    `  Ruined: ${s.nextHalfCookie}%\n` +
+    `  Unlocked: ${s.nextLockIn}%\n`;
+  appendLog("\n" + log.trimEnd());
+}
+
+function undoLastBlock() {
+  restoreSnapshot();
+}
+
+function corruptSaveFile() {
+  state.fullCookie = bossCowardicePenalty;
+  state.halfCookie = bossCowardicePenalty;
+  state.lockIn = bossCowardicePenalty;
+
+  state.momentumLevel = 0;
+  state.momentumRoundsBuffer = 0;
+  state.momentumPeak = 0;
+  state.momentumTotalGain = 0;
+  state.momentumPunishLoss = 0;
+
+  state.bossPunishThisCycle = true;
+  state.punishments.push("Cowardice before the Boss — Total Save Corruption");
+
+  setBossWarning(false);
+  updateBadges();
+  setLog(
+    "Boss punishment applied.\n" +
+    `Full, Ruined, and Unlocked set to ${bossCowardicePenalty}%.\n` +
+    "Finish the cycle if you dare."
+  );
+  saveState({ silent: false });
+}
+
+function resetAll() {
+  state.cycle = 1;
+  state.blockInCycle = 0;
+  state.roundsInCycle = 0;
+  state.exitAttempt = 0;
+  state.totalHits = 0;
+  state.hitsEasy = 0;
+  state.hitsMedium = 0;
+  state.hitsHard = 0;
+  state.hitsExtreme = 0;
+  state.hitsFullForce = 0;
+  state.hitsMaxPower = 0;
+  state.fullCookie = 0.0;
+  state.halfCookie = 0.0;
+  state.lockIn = 0.0;
+  state.inCycle = true;
+  state.cycleEnded = false;
+  state.lastSummary = null;
+  state.lastSnapshot = null;
+  state.momentumLevel = 0;
+  state.momentumRoundsBuffer = 0;
+  state.lastExitRound = 0;
+  state.punishments = [];
+  state.exitAttemptsLog = [];
+  state.momentumPeak = 0;
+  state.momentumTotalGain = 0;
+  state.momentumPunishLoss = 0;
+  state.isBossBlock = false;
+  state.bossOccurredThisCycle = false;
+  state.bossPunishThisCycle = false;
+  // Reset targets
+  state.targetSwings = 0;
+  state.targetRounds = 0;
+  state.targetBlocks = 0;
+  state.targetsSet = false;
+  setBossWarning(false);
+  updateBadges();
+  saveState({ silent: true });
+  setLog(
+    "Hard reset: state cleared.\n" +
+    "Cycle 1 ready with 0% Progress.\n" +
+    "Press \"Next\" to set targets and start."
+  );
+}
+
+function getSettingsSnapshot() {
+  const logEl = document.getElementById("log");
+  return {
+    version: "momentum-autosave-v1",
+    // Progress data
+    progress: {
+      cycle: state.cycle,
+      blockInCycle: state.blockInCycle,
+      roundsInCycle: state.roundsInCycle,
+      exitAttempt: state.exitAttempt,
+      totalHits: state.totalHits,
+      hitsEasy: state.hitsEasy,
+      hitsMedium: state.hitsMedium,
+      hitsHard: state.hitsHard,
+      hitsExtreme: state.hitsExtreme,
+      hitsFullForce: state.hitsFullForce,
+      hitsMaxPower: state.hitsMaxPower,
+      fullCookie: state.fullCookie,
+      halfCookie: state.halfCookie,
+      lockIn: state.lockIn,
+      inCycle: state.inCycle,
+      cycleEnded: state.cycleEnded,
+      lastSummary: state.lastSummary,
+      momentumLevel: state.momentumLevel,
+      momentumRoundsBuffer: state.momentumRoundsBuffer,
+      punishments: state.punishments.slice(),
+      exitAttemptsLog: state.exitAttemptsLog.slice(),
+      momentumPeak: state.momentumPeak,
+      momentumTotalGain: state.momentumTotalGain,
+      momentumPunishLoss: state.momentumPunishLoss,
+      lastExitRound: state.lastExitRound,
+      forcedBlockPending: state.forcedBlockPending,
+      canContinueExitChain: state.canContinueExitChain,
+      isBossBlock: state.isBossBlock,
+      bossOccurredThisCycle: state.bossOccurredThisCycle,
+      bossPunishThisCycle: state.bossPunishThisCycle,
+      targetSwings: state.targetSwings,
+      targetRounds: state.targetRounds,
+      targetBlocks: state.targetBlocks,
+      targetsSet: state.targetsSet,
+      logHtml: logEl ? logEl.innerHTML : ""
+    },
+    config: {
+      difficulties,
+      blockRoundsMin,
+      blockRoundsMax,
+      blockBandWeights,
+      fullBaseGain,
+      halfBaseGain,
+      lockBaseDecrease,
+      maxPowerCycleChance,
+      maxPowerBlockMin,
+      maxPowerBlockMax,
+      maxPowerMultiplier,
+      bossBlockChance,
+      bossMinRounds,
+      bossMaxRounds,
+      bossCowardicePenalty,
+      cookieRollMin,
+      cookieRollMax,
+      cookieBandWeights,
+      lockRollMin,
+      lockRollMax,
+      lockBandWeights,
+      exitWeights: state.exitWeights,
+      minRoundsBeforeExit,
+      maxFullPerRound,
+      maxHalfPerRound,
+      maxLockPerRound,
+      minFullPerRound,
+      minHalfPerRound,
+      minLockPerRound,
+      bandWeightLow,
+      bandWeightMed,
+      bandWeightHigh,
+      bandShiftPerMomentum,
+      momentumRoundsPerStep,
+      momentumBigBlockThreshold,
+      momentumBigBlockBonus,
+      momentumMaxCycleBonus,
+      momentumCapPerLevel,
+      momentumCapMaxMult,
+      momentumEarlyDonePenalty,
+      momentumGiveUpResetTo,
+      earlyExitFlatPenalty,
+      earlyExitPercentPenalty,
+      earlyExitWipeMomentum,
+      giveUpPercentPenalty,
+      giveUpFlatPenalty,
+      targetImDonePenalty,
+      targetGiveUpPenalty,
+      swingRanges,
+      bossSwingMultiplier,
+      softSaveTimeoutMinutes
+    }
+  };
+}
+
+function applySettingsSnapshot(snapshot) {
+  if (!snapshot || !snapshot.config) return;
+  const c = snapshot.config;
+
+  // Restore config settings
+  if (c.difficulties) difficulties = c.difficulties;
+  if (typeof c.blockRoundsMin === "number") blockRoundsMin = c.blockRoundsMin;
+  if (typeof c.blockRoundsMax === "number") blockRoundsMax = c.blockRoundsMax;
+  if (Array.isArray(c.blockBandWeights)) blockBandWeights = c.blockBandWeights;
+  if (typeof c.fullBaseGain === "number") fullBaseGain = c.fullBaseGain;
+  if (typeof c.halfBaseGain === "number") halfBaseGain = c.halfBaseGain;
+  if (typeof c.lockBaseDecrease === "number") lockBaseDecrease = c.lockBaseDecrease;
+  if (typeof c.maxPowerCycleChance === "number") maxPowerCycleChance = c.maxPowerCycleChance;
+  if (typeof c.maxPowerBlockMin === "number") maxPowerBlockMin = c.maxPowerBlockMin;
+  if (typeof c.maxPowerBlockMax === "number") maxPowerBlockMax = c.maxPowerBlockMax;
+  if (typeof c.maxPowerMultiplier === "number") maxPowerMultiplier = c.maxPowerMultiplier;
+  if (typeof c.bossBlockChance === "number") bossBlockChance = c.bossBlockChance;
+  if (typeof c.bossMinRounds === "number") bossMinRounds = c.bossMinRounds;
+  if (typeof c.bossMaxRounds === "number") bossMaxRounds = c.bossMaxRounds;
+  if (typeof c.cookieRollMin === "number") cookieRollMin = c.cookieRollMin;
+  if (typeof c.cookieRollMax === "number") cookieRollMax = c.cookieRollMax;
+  if (Array.isArray(c.cookieBandWeights)) cookieBandWeights = c.cookieBandWeights;
+  if (typeof c.lockRollMin === "number") lockRollMin = c.lockRollMin;
+  if (typeof c.lockRollMax === "number") lockRollMax = c.lockRollMax;
+  if (Array.isArray(c.lockBandWeights)) lockBandWeights = c.lockBandWeights;
+  if (Array.isArray(c.exitWeights)) state.exitWeights = c.exitWeights;
+  if (typeof c.minRoundsBeforeExit === "number") minRoundsBeforeExit = c.minRoundsBeforeExit;
+  if (typeof c.maxFullPerRound === "number") maxFullPerRound = c.maxFullPerRound;
+  if (typeof c.maxHalfPerRound === "number") maxHalfPerRound = c.maxHalfPerRound;
+  if (typeof c.maxLockPerRound === "number") maxLockPerRound = c.maxLockPerRound;
+  if (typeof c.minFullPerRound === "number") minFullPerRound = c.minFullPerRound;
+  if (typeof c.minHalfPerRound === "number") minHalfPerRound = c.minHalfPerRound;
+  if (typeof c.minLockPerRound === "number") minLockPerRound = c.minLockPerRound;
+  if (typeof c.bandWeightLow === "number") bandWeightLow = c.bandWeightLow;
+  if (typeof c.bandWeightMed === "number") bandWeightMed = c.bandWeightMed;
+  if (typeof c.bandWeightHigh === "number") bandWeightHigh = c.bandWeightHigh;
+  if (typeof c.bandShiftPerMomentum === "number") bandShiftPerMomentum = c.bandShiftPerMomentum;
+  if (typeof c.momentumRoundsPerStep === "number") momentumRoundsPerStep = c.momentumRoundsPerStep;
+  if (typeof c.momentumBigBlockThreshold === "number") momentumBigBlockThreshold = c.momentumBigBlockThreshold;
+  if (typeof c.momentumBigBlockBonus === "number") momentumBigBlockBonus = c.momentumBigBlockBonus;
+  if (typeof c.momentumMaxCycleBonus === "number") momentumMaxCycleBonus = c.momentumMaxCycleBonus;
+  if (typeof c.momentumCapPerLevel === "number") momentumCapPerLevel = c.momentumCapPerLevel;
+  if (typeof c.momentumCapMaxMult === "number") momentumCapMaxMult = c.momentumCapMaxMult;
+  if (typeof c.momentumEarlyDonePenalty === "number") momentumEarlyDonePenalty = c.momentumEarlyDonePenalty;
+  if (typeof c.momentumGiveUpResetTo === "number") momentumGiveUpResetTo = c.momentumGiveUpResetTo;
+  if (typeof c.bossCowardicePenalty === "number") bossCowardicePenalty = c.bossCowardicePenalty;
+  if (typeof c.earlyExitFlatPenalty === "number") earlyExitFlatPenalty = c.earlyExitFlatPenalty;
+  if (typeof c.earlyExitPercentPenalty === "number") earlyExitPercentPenalty = c.earlyExitPercentPenalty;
+  if (typeof c.earlyExitWipeMomentum === "boolean") earlyExitWipeMomentum = c.earlyExitWipeMomentum;
+  if (typeof c.giveUpPercentPenalty === "number") giveUpPercentPenalty = c.giveUpPercentPenalty;
+  if (typeof c.giveUpFlatPenalty === "number") giveUpFlatPenalty = c.giveUpFlatPenalty;
+  if (typeof c.targetImDonePenalty === "number") targetImDonePenalty = c.targetImDonePenalty;
+  if (typeof c.targetGiveUpPenalty === "number") targetGiveUpPenalty = c.targetGiveUpPenalty;
+  
+  // Swing ranges
+  if (c.swingRanges) {
+    if (c.swingRanges.easy) swingRanges.easy = c.swingRanges.easy;
+    if (c.swingRanges.medium) swingRanges.medium = c.swingRanges.medium;
+    if (c.swingRanges.hard) swingRanges.hard = c.swingRanges.hard;
+    if (c.swingRanges.extreme) swingRanges.extreme = c.swingRanges.extreme;
+    if (c.swingRanges.fullForce) swingRanges.fullForce = c.swingRanges.fullForce;
+    if (c.swingRanges.maxPower) swingRanges.maxPower = c.swingRanges.maxPower;
+  }
+  if (typeof c.bossSwingMultiplier === "number") bossSwingMultiplier = c.bossSwingMultiplier;
+  if (typeof c.softSaveTimeoutMinutes === "number") softSaveTimeoutMinutes = c.softSaveTimeoutMinutes;
+
+  // Restore progress data if present
+  if (snapshot.progress) {
+    const p = snapshot.progress;
+    if (typeof p.cycle === "number") state.cycle = p.cycle;
+    if (typeof p.blockInCycle === "number") state.blockInCycle = p.blockInCycle;
+    if (typeof p.roundsInCycle === "number") state.roundsInCycle = p.roundsInCycle;
+    if (typeof p.exitAttempt === "number") state.exitAttempt = p.exitAttempt;
+    if (typeof p.totalHits === "number") state.totalHits = p.totalHits;
+    if (typeof p.hitsEasy === "number") state.hitsEasy = p.hitsEasy;
+    if (typeof p.hitsMedium === "number") state.hitsMedium = p.hitsMedium;
+    if (typeof p.hitsHard === "number") state.hitsHard = p.hitsHard;
+    if (typeof p.hitsExtreme === "number") state.hitsExtreme = p.hitsExtreme;
+    if (typeof p.hitsFullForce === "number") state.hitsFullForce = p.hitsFullForce;
+    if (typeof p.hitsMaxPower === "number") state.hitsMaxPower = p.hitsMaxPower;
+    if (typeof p.fullCookie === "number") state.fullCookie = p.fullCookie;
+    if (typeof p.halfCookie === "number") state.halfCookie = p.halfCookie;
+    if (typeof p.lockIn === "number") state.lockIn = p.lockIn;
+    if (typeof p.inCycle === "boolean") state.inCycle = p.inCycle;
+    if (typeof p.cycleEnded === "boolean") state.cycleEnded = p.cycleEnded;
+    if (p.lastSummary !== undefined) state.lastSummary = p.lastSummary;
+    if (typeof p.momentumLevel === "number") state.momentumLevel = p.momentumLevel;
+    if (typeof p.momentumRoundsBuffer === "number") state.momentumRoundsBuffer = p.momentumRoundsBuffer;
+    if (Array.isArray(p.punishments)) state.punishments = p.punishments;
+    if (Array.isArray(p.exitAttemptsLog)) state.exitAttemptsLog = p.exitAttemptsLog;
+    if (typeof p.momentumPeak === "number") state.momentumPeak = p.momentumPeak;
+    if (typeof p.momentumTotalGain === "number") state.momentumTotalGain = p.momentumTotalGain;
+    if (typeof p.momentumPunishLoss === "number") state.momentumPunishLoss = p.momentumPunishLoss;
+    if (typeof p.lastExitRound === "number") state.lastExitRound = p.lastExitRound;
+    if (typeof p.forcedBlockPending === "boolean") state.forcedBlockPending = p.forcedBlockPending;
+    if (typeof p.canContinueExitChain === "boolean") state.canContinueExitChain = p.canContinueExitChain;
+    if (typeof p.isBossBlock === "boolean") state.isBossBlock = p.isBossBlock;
+    if (typeof p.bossOccurredThisCycle === "boolean") state.bossOccurredThisCycle = p.bossOccurredThisCycle;
+    if (typeof p.bossPunishThisCycle === "boolean") state.bossPunishThisCycle = p.bossPunishThisCycle;
+    if (typeof p.targetSwings === "number") state.targetSwings = p.targetSwings;
+    if (typeof p.targetRounds === "number") state.targetRounds = p.targetRounds;
+    if (typeof p.targetBlocks === "number") state.targetBlocks = p.targetBlocks;
+    if (typeof p.targetsSet === "boolean") state.targetsSet = p.targetsSet;
+    
+    // Restore visual state
+    if (p.logHtml) {
+      const logEl = document.getElementById("log");
+      if (logEl) logEl.innerHTML = p.logHtml;
+    }
+    
+    // Restore boss warning
+    setBossWarning(state.isBossBlock);
+  }
+
+  updateBadges();
+}
+
+function openProfile() {
+  const overlay = document.getElementById("profileOverlay");
+  const area = document.getElementById("profileText");
+  if (overlay) overlay.style.display = "flex";
+  if (area) {
+    area.value = "";
+    area.placeholder = "Paste a profile here to import settings + progress, or press \"Export\" to save your current game.";
+  }
+}
+
+function closeProfile() {
+  const overlay = document.getElementById("profileOverlay");
+  if (overlay) overlay.style.display = "none";
+}
+
+function exportSettingsToText() {
+  const area = document.getElementById("profileText");
+  if (!area) return;
+  const snapshot = getSettingsSnapshot();
+  try {
+    area.value = JSON.stringify(snapshot);
+  } catch (e) {
+    area.value = "";
+    setLogHtml(createStatusMessage('danger', '❌', 'Failed to export profile.'));
+    return;
+  }
+  area.focus();
+  area.select();
+  try {
+    const ok = document.execCommand("copy");
+    if (ok) {
+      // Don't change the log - keep current game state visible
+    }
+  } catch (e) {
+    // Clipboard access failed, but profile is still in textarea
+  }
+}
+
+function importSettingsFromText() {
+  const area = document.getElementById("profileText");
+  if (!area) return;
+  const text = area.value.trim();
+  if (!text) {
+    setLogHtml(createStatusMessage('warning', '⚠️', 'No text found to import.'));
+    return;
+  }
+  try {
+    const snapshot = JSON.parse(text);
+    if (!snapshot || !snapshot.config) {
+      setLogHtml(createStatusMessage('danger', '❌', 'Invalid profile (missing config).'));
+      return;
+    }
+    applySettingsSnapshot(snapshot);
+    saveState({ silent: true });
+    
+    // Show success message with details
+    const hasProgress = snapshot.progress && typeof snapshot.progress.cycle === "number";
+    const msg = hasProgress 
+      ? `Profile imported! Cycle ${state.cycle}, Progress: Full ${state.fullCookie.toFixed(1)}% / Ruined ${state.halfCookie.toFixed(1)}% / Unlocked ${state.lockIn.toFixed(1)}%`
+      : 'Settings profile imported successfully!';
+    setLogHtml(createStatusMessage('success', '✅', msg));
+    closeProfile();
+  } catch (e) {
+    setLogHtml(createStatusMessage('danger', '❌', 'Failed to parse profile JSON.'));
+  }
+}
+
+// ========= SAVE SYSTEM =========
+const SOFT_SAVE_KEY = "cycleGameSoftSave";
+const HARD_SAVE_KEY = "cycleGameState";
+
+function getInactivityTimeoutMs() {
+  return softSaveTimeoutMinutes * 60 * 1000;
+}
+
+function getSavePayload() {
+  const logEl = document.getElementById("log");
+  return {
+    schemaVersion: "brutal-0.1",
+    timestamp: Date.now(),
+    cycle: state.cycle,
+    blockInCycle: state.blockInCycle,
+    roundsInCycle: state.roundsInCycle,
+    exitAttempt: state.exitAttempt,
+    totalHits: state.totalHits,
+    hitsEasy: state.hitsEasy,
+    hitsMedium: state.hitsMedium,
+    hitsHard: state.hitsHard,
+    hitsExtreme: state.hitsExtreme,
+    hitsFullForce: state.hitsFullForce,
+    hitsMaxPower: state.hitsMaxPower,
+    fullCookie: state.fullCookie,
+    halfCookie: state.halfCookie,
+    lockIn: state.lockIn,
+    inCycle: state.inCycle,
+    cycleEnded: state.cycleEnded,
+    lastSummary: state.lastSummary,
+    momentumLevel: state.momentumLevel,
+    momentumRoundsBuffer: state.momentumRoundsBuffer,
+    punishments: Array.isArray(state.punishments) ? state.punishments.slice() : [],
+    exitAttemptsLog: Array.isArray(state.exitAttemptsLog) ? state.exitAttemptsLog.slice() : [],
+    momentumPeak: state.momentumPeak,
+    momentumTotalGain: state.momentumTotalGain,
+    momentumPunishLoss: state.momentumPunishLoss,
+    lastExitRound: state.lastExitRound,
+    forcedBlockPending: state.forcedBlockPending,
+    canContinueExitChain: state.canContinueExitChain,
+    isBossBlock: state.isBossBlock,
+    bossOccurredThisCycle: state.bossOccurredThisCycle,
+    bossPunishThisCycle: state.bossPunishThisCycle,
+    targetSwings: state.targetSwings,
+    targetRounds: state.targetRounds,
+    targetBlocks: state.targetBlocks,
+    targetsSet: state.targetsSet,
+    logHtml: logEl ? logEl.innerHTML : "",
+    config: {
+      difficulties,
+      blockRoundsMin,
+      blockRoundsMax,
+      blockBandWeights,
+      fullBaseGain,
+      halfBaseGain,
+      lockBaseDecrease,
+      maxPowerCycleChance,
+      maxPowerBlockMin,
+      maxPowerBlockMax,
+      maxPowerMultiplier,
+      bossBlockChance,
+      bossMinRounds,
+      bossMaxRounds,
+      bossCowardicePenalty,
+      cookieRollMin,
+      cookieRollMax,
+      cookieBandWeights,
+      lockRollMin,
+      lockRollMax,
+      lockBandWeights,
+      exitWeights: state.exitWeights,
+      minRoundsBeforeExit,
+      maxFullPerRound,
+      maxHalfPerRound,
+      maxLockPerRound,
+      minFullPerRound,
+      minHalfPerRound,
+      minLockPerRound,
+      bandWeightLow,
+      bandWeightMed,
+      bandWeightHigh,
+      bandShiftPerMomentum,
+      momentumRoundsPerStep,
+      momentumBigBlockThreshold,
+      momentumBigBlockBonus,
+      momentumMaxCycleBonus,
+      momentumCapPerLevel,
+      momentumCapMaxMult,
+      momentumEarlyDonePenalty,
+      momentumGiveUpResetTo,
+      earlyExitFlatPenalty,
+      earlyExitPercentPenalty,
+      earlyExitWipeMomentum,
+      giveUpPercentPenalty,
+      giveUpFlatPenalty,
+      targetImDonePenalty,
+      targetGiveUpPenalty,
+      swingRanges,
+      bossSwingMultiplier,
+      softSaveTimeoutMinutes
+    }
+  };
+}
+
+// Soft save - called after each block, expires after 60 min inactivity
+function softSave() {
+  try {
+    const payload = getSavePayload();
+    localStorage.setItem(SOFT_SAVE_KEY, JSON.stringify(payload));
+  } catch (e) {
+    // Silent fail for soft save
+  }
+}
+
+// Hard save - called at end of each cycle, permanent until next hard save
+function hardSave(options) {
+  const silent = options && options.silent;
+  try {
+    const payload = getSavePayload();
+    localStorage.setItem(HARD_SAVE_KEY, JSON.stringify(payload));
+    // Clear soft save since hard save is now up to date
+    localStorage.removeItem(SOFT_SAVE_KEY);
+    if (!silent) {
+      const logEl = document.getElementById("log");
+      const currentHtml = logEl ? logEl.innerHTML : '';
+      const saveMsg = createStatusMessage('success', '💾', 'Cycle complete — Progress saved!');
+      if (logEl) logEl.innerHTML = saveMsg + currentHtml;
+    }
+  } catch (e) {
+    const logEl = document.getElementById("log");
+    const errMsg = createStatusMessage('danger', '❌', 'Failed to save game.');
+    if (logEl) logEl.innerHTML = errMsg + logEl.innerHTML;
+  }
+}
+
+// Legacy saveState - now calls hardSave for compatibility
+function saveState(options) {
+  hardSave(options);
+}
+
+function loadState(auto) {
+  const fromAuto = auto === true;
+  try {
+    // Check for soft save first (mid-cycle progress)
+    const softRaw = localStorage.getItem(SOFT_SAVE_KEY);
+    const hardRaw = localStorage.getItem(HARD_SAVE_KEY);
+    
+    if (!softRaw && !hardRaw) {
+      if (!fromAuto) {
+        setLogHtml(createStatusMessage('warning', '⚠️', 'No saved game found.'));
+      }
+      return;
+    }
+    
+    let s = null;
+    let usedSoftSave = false;
+    
+    // Try soft save first if it exists and is fresh (< 60 min old)
+    if (softRaw) {
+      const softData = JSON.parse(softRaw);
+      const age = Date.now() - (softData.timestamp || 0);
+      
+      if (age < getInactivityTimeoutMs()) {
+        // Soft save is fresh, use it
+        s = softData;
+        usedSoftSave = true;
+      } else {
+        // Soft save expired, remove it
+        localStorage.removeItem(SOFT_SAVE_KEY);
+      }
+    }
+    
+    // Fall back to hard save if soft save wasn't used
+    if (!s && hardRaw) {
+      s = JSON.parse(hardRaw);
+    }
+    
+    if (!s) {
+      if (!fromAuto) {
+        setLogHtml(createStatusMessage('warning', '⚠️', 'No valid save found.'));
+      }
+      return;
+    }
+    
+    // Apply save data
+    applySaveData(s);
+
+    updateBadges();
+    setBossWarning(state.isBossBlock);
+
+    const logEl = document.getElementById("log");
+    if (s.logHtml && logEl) {
+      logEl.innerHTML = s.logHtml;
+    } else if (s.logText && logEl) {
+      logEl.textContent = s.logText;
+    } else {
+      const saveType = usedSoftSave ? "Mid-cycle progress restored" : "Save loaded";
+      setLogHtml(`<div class="game-message"><div class="icon">💾</div><div class="title">${saveType}</div><div class="subtitle">Cycle ${state.cycle} — Press "Next" to continue</div></div>`);
+    }
+  } catch (e) {
+    setLogHtml(createStatusMessage('danger', '❌', 'Failed to load saved game.'));
+  }
+}
+
+// Helper to apply save data to state
+function applySaveData(s) {
+  state.cycle = s.cycle;
+  state.blockInCycle = s.blockInCycle;
+  state.roundsInCycle = s.roundsInCycle;
+  state.exitAttempt = s.exitAttempt;
+  state.totalHits = s.totalHits || 0;
+  state.hitsEasy = s.hitsEasy || 0;
+  state.hitsMedium = s.hitsMedium || 0;
+  state.hitsHard = s.hitsHard || 0;
+  state.hitsExtreme = s.hitsExtreme || 0;
+  state.hitsFullForce = s.hitsFullForce || 0;
+  state.hitsMaxPower = s.hitsMaxPower || 0;
+  state.fullCookie = s.fullCookie;
+  state.halfCookie = s.halfCookie;
+  state.lockIn = s.lockIn;
+  state.inCycle = s.inCycle;
+  state.cycleEnded = s.cycleEnded;
+  state.lastSummary = s.lastSummary || null;
+  state.lastSnapshot = null;
+  state.momentumLevel = s.momentumLevel || 0;
+  state.momentumRoundsBuffer = s.momentumRoundsBuffer || 0;
+  state.punishments = s.punishments || [];
+  state.exitAttemptsLog = s.exitAttemptsLog || [];
+  state.momentumPeak = s.momentumPeak || 0;
+  state.momentumTotalGain = s.momentumTotalGain || 0;
+  state.momentumPunishLoss = s.momentumPunishLoss || 0;
+  state.lastExitRound = s.lastExitRound || 0;
+  state.forcedBlockPending = s.forcedBlockPending || false;
+  state.canContinueExitChain = s.canContinueExitChain || false;
+  state.isBossBlock = s.isBossBlock || false;
+  state.bossOccurredThisCycle = s.bossOccurredThisCycle || false;
+  state.bossPunishThisCycle = s.bossPunishThisCycle || false;
+  state.targetSwings = s.targetSwings || 0;
+  state.targetRounds = s.targetRounds || 0;
+  state.targetBlocks = s.targetBlocks || 0;
+  state.targetsSet = s.targetsSet || false;
+
+  const schemaVersion = s.schemaVersion || "legacy";
+
+  if (s.config && schemaVersion === "brutal-0.1") {
+    const c = s.config;
+    if (c.difficulties) difficulties = c.difficulties;
+    if (typeof c.blockRoundsMin === "number") blockRoundsMin = c.blockRoundsMin;
+    if (typeof c.blockRoundsMax === "number") blockRoundsMax = c.blockRoundsMax;
+    if (Array.isArray(c.blockBandWeights)) blockBandWeights = c.blockBandWeights;
+    if (typeof c.fullBaseGain === "number") fullBaseGain = c.fullBaseGain;
+    if (typeof c.halfBaseGain === "number") halfBaseGain = c.halfBaseGain;
+    if (typeof c.lockBaseDecrease === "number") lockBaseDecrease = c.lockBaseDecrease;
+    if (typeof c.maxPowerCycleChance === "number") maxPowerCycleChance = c.maxPowerCycleChance;
+    if (typeof c.maxPowerBlockMin === "number") maxPowerBlockMin = c.maxPowerBlockMin;
+    if (typeof c.maxPowerBlockMax === "number") maxPowerBlockMax = c.maxPowerBlockMax;
+    if (typeof c.maxPowerMultiplier === "number") maxPowerMultiplier = c.maxPowerMultiplier;
+    if (typeof c.bossBlockChance === "number") bossBlockChance = c.bossBlockChance;
+    if (typeof c.bossMinRounds === "number") bossMinRounds = c.bossMinRounds;
+    if (typeof c.bossMaxRounds === "number") bossMaxRounds = c.bossMaxRounds;
+    if (typeof c.cookieRollMin === "number") cookieRollMin = c.cookieRollMin;
+    if (typeof c.cookieRollMax === "number") cookieRollMax = c.cookieRollMax;
+    if (Array.isArray(c.cookieBandWeights)) cookieBandWeights = c.cookieBandWeights;
+    if (typeof c.lockRollMin === "number") lockRollMin = c.lockRollMin;
+    if (typeof c.lockRollMax === "number") lockRollMax = c.lockRollMax;
+    if (Array.isArray(c.lockBandWeights)) lockBandWeights = c.lockBandWeights;
+    if (Array.isArray(c.exitWeights)) state.exitWeights = c.exitWeights;
+    if (typeof c.minRoundsBeforeExit === "number") minRoundsBeforeExit = c.minRoundsBeforeExit;
+    if (typeof c.maxFullPerRound === "number") maxFullPerRound = c.maxFullPerRound;
+    if (typeof c.maxHalfPerRound === "number") maxHalfPerRound = c.maxHalfPerRound;
+    if (typeof c.maxLockPerRound === "number") maxLockPerRound = c.maxLockPerRound;
+    if (typeof c.minFullPerRound === "number") minFullPerRound = c.minFullPerRound;
+    if (typeof c.minHalfPerRound === "number") minHalfPerRound = c.minHalfPerRound;
+    if (typeof c.minLockPerRound === "number") minLockPerRound = c.minLockPerRound;
+    if (typeof c.bandWeightLow === "number") bandWeightLow = c.bandWeightLow;
+    if (typeof c.bandWeightMed === "number") bandWeightMed = c.bandWeightMed;
+    if (typeof c.bandWeightHigh === "number") bandWeightHigh = c.bandWeightHigh;
+    if (typeof c.bandShiftPerMomentum === "number") bandShiftPerMomentum = c.bandShiftPerMomentum;
+    if (typeof c.momentumRoundsPerStep === "number") momentumRoundsPerStep = c.momentumRoundsPerStep;
+    if (typeof c.momentumBigBlockThreshold === "number") momentumBigBlockThreshold = c.momentumBigBlockThreshold;
+    if (typeof c.momentumBigBlockBonus === "number") momentumBigBlockBonus = c.momentumBigBlockBonus;
+    if (typeof c.momentumMaxCycleBonus === "number") momentumMaxCycleBonus = c.momentumMaxCycleBonus;
+    if (typeof c.momentumCapPerLevel === "number") momentumCapPerLevel = c.momentumCapPerLevel;
+    if (typeof c.momentumCapMaxMult === "number") momentumCapMaxMult = c.momentumCapMaxMult;
+    if (typeof c.momentumEarlyDonePenalty === "number") momentumEarlyDonePenalty = c.momentumEarlyDonePenalty;
+    if (typeof c.momentumGiveUpResetTo === "number") momentumGiveUpResetTo = c.momentumGiveUpResetTo;
+    if (typeof c.bossCowardicePenalty === "number") bossCowardicePenalty = c.bossCowardicePenalty;
+    if (typeof c.earlyExitFlatPenalty === "number") earlyExitFlatPenalty = c.earlyExitFlatPenalty;
+    if (typeof c.earlyExitPercentPenalty === "number") earlyExitPercentPenalty = c.earlyExitPercentPenalty;
+    if (typeof c.earlyExitWipeMomentum === "boolean") earlyExitWipeMomentum = c.earlyExitWipeMomentum;
+    if (typeof c.giveUpPercentPenalty === "number") giveUpPercentPenalty = c.giveUpPercentPenalty;
+    if (typeof c.giveUpFlatPenalty === "number") giveUpFlatPenalty = c.giveUpFlatPenalty;
+    if (typeof c.targetImDonePenalty === "number") targetImDonePenalty = c.targetImDonePenalty;
+    if (typeof c.targetGiveUpPenalty === "number") targetGiveUpPenalty = c.targetGiveUpPenalty;
+  }
+}
+
+/* ========= SETTINGS UI ========= */
+function openSettings() {
+  // build difficulty fields
+  const container = document.getElementById("settingsDiffs");
+  container.innerHTML = "";
+  difficulties.forEach((d, i) => {
+    const row = document.createElement("div");
+    row.className = "field-row";
+    const label = document.createElement("label");
+    label.textContent = d.name + " prob / mult";
+    const inputProb = document.createElement("input");
+    inputProb.type = "number";
+    inputProb.step = "0.1";
+    inputProb.id = "diffProb_" + i;
+    inputProb.value = d.prob;
+    const inputMult = document.createElement("input");
+    inputMult.type = "number";
+    inputMult.step = "0.01";
+    inputMult.id = "diffMult_" + i;
+    inputMult.value = d.mult;
+    row.appendChild(label);
+    row.appendChild(inputProb);
+    row.appendChild(inputMult);
+    container.appendChild(row);
+  });
+
+  // block size settings
+  document.getElementById("blockRoundsMinInput").value = blockRoundsMin;
+  document.getElementById("blockRoundsMaxInput").value = blockRoundsMax;
+  document.getElementById("blockBandW0").value = blockBandWeights[0];
+  document.getElementById("blockBandW1").value = blockBandWeights[1];
+  document.getElementById("blockBandW2").value = blockBandWeights[2];
+  document.getElementById("blockBandW3").value = blockBandWeights[3];
+
+  // exit ends
+  document.getElementById("minRoundsBeforeExitInput").value = minRoundsBeforeExit;
+  state.exitWeights.forEach((w, i) => {
+    const el = document.getElementById("exitEnd" + i);
+    if (el) el.value = w.end;
+  });
+
+  // per-round min/max caps
+  document.getElementById("fullMinPerRoundInput").value = minFullPerRound;
+  document.getElementById("fullMaxPerRoundInput").value = maxFullPerRound;
+  document.getElementById("halfMinPerRoundInput").value = minHalfPerRound;
+  document.getElementById("halfMaxPerRoundInput").value = maxHalfPerRound;
+  document.getElementById("lockMinPerRoundInput").value = minLockPerRound;
+  document.getElementById("lockMaxPerRoundInput").value = maxLockPerRound;
+
+  // max power
+  document.getElementById("maxPowerChanceInput").value = maxPowerCycleChance;
+  const mpMinEl = document.getElementById("maxPowerBlockMinInput");
+  const mpMaxEl = document.getElementById("maxPowerBlockMaxInput");
+  const mpMultEl = document.getElementById("maxPowerMultiplierInput");
+  if (mpMinEl) mpMinEl.value = maxPowerBlockMin;
+  if (mpMaxEl) mpMaxEl.value = maxPowerBlockMax;
+  if (mpMultEl) mpMultEl.value = maxPowerMultiplier;
+
+  // boss block settings
+  const bbChanceEl = document.getElementById("bossBlockChanceInput");
+  const bbMinEl = document.getElementById("bossMinRoundsInput");
+  const bbMaxEl = document.getElementById("bossMaxRoundsInput");
+  if (bbChanceEl) bbChanceEl.value = bossBlockChance * 100; // convert to percent for display
+  if (bbMinEl) bbMinEl.value = bossMinRounds;
+  if (bbMaxEl) bbMaxEl.value = bossMaxRounds;
+
+  // cookie roll settings
+  document.getElementById("cookieRollMinInput").value = cookieRollMin;
+  document.getElementById("cookieRollMaxInput").value = cookieRollMax;
+  document.getElementById("cookieBandW0").value = cookieBandWeights[0];
+  document.getElementById("cookieBandW1").value = cookieBandWeights[1];
+  document.getElementById("cookieBandW2").value = cookieBandWeights[2];
+  document.getElementById("cookieBandW3").value = cookieBandWeights[3];
+
+
+  // band weights for per-round RNG
+  const bwLowInput = document.getElementById("bandWeightLowInput");
+  const bwMedInput = document.getElementById("bandWeightMedInput");
+  const bwHighInput = document.getElementById("bandWeightHighInput");
+  if (bwLowInput) bwLowInput.value = bandWeightLow;
+  if (bwMedInput) bwMedInput.value = bandWeightMed;
+  if (bwHighInput) bwHighInput.value = bandWeightHigh;
+
+  // momentum tuning
+  const mRoundInput = document.getElementById("momentumRoundsPerStepInput");
+  const mBigThreshInput = document.getElementById("momentumBigBlockThresholdInput");
+  const mBigBonusInput = document.getElementById("momentumBigBlockBonusInput");
+  const mMaxCycleBonusInput = document.getElementById("momentumMaxCycleBonusInput");
+  const mCapPerLevelInput = document.getElementById("momentumCapPerLevelInput");
+  const mCapMaxMultInput = document.getElementById("momentumCapMaxMultInput");
+  const mShiftInput = document.getElementById("bandShiftPerMomentumInput");
+  const mEarlyPenaltyInput = document.getElementById("momentumEarlyDonePenaltyInput");
+  const mGiveUpInput = document.getElementById("momentumGiveUpResetToInput");
+
+  if (mRoundInput) mRoundInput.value = momentumRoundsPerStep;
+  if (mBigThreshInput) mBigThreshInput.value = momentumBigBlockThreshold;
+  if (mBigBonusInput) mBigBonusInput.value = momentumBigBlockBonus;
+  if (mMaxCycleBonusInput) mMaxCycleBonusInput.value = momentumMaxCycleBonus;
+  if (mCapPerLevelInput) mCapPerLevelInput.value = momentumCapPerLevel;
+  if (mCapMaxMultInput) mCapMaxMultInput.value = momentumCapMaxMult;
+  if (mShiftInput) mShiftInput.value = bandShiftPerMomentum;
+  if (mEarlyPenaltyInput) mEarlyPenaltyInput.value = momentumEarlyDonePenalty;
+  if (mGiveUpInput) mGiveUpInput.value = momentumGiveUpResetTo;
+
+  // lock roll settings
+  document.getElementById("lockRollMinInput").value = lockRollMin;
+  document.getElementById("lockRollMaxInput").value = lockRollMax;
+  document.getElementById("lockBandW0").value = lockBandWeights[0];
+  document.getElementById("lockBandW1").value = lockBandWeights[1];
+  document.getElementById("lockBandW2").value = lockBandWeights[2];
+  document.getElementById("lockBandW3").value = lockBandWeights[3];
+
+  // punishment settings
+  const earlyFlatEl = document.getElementById("earlyExitFlatPenaltyInput");
+  const earlyPercentEl = document.getElementById("earlyExitPercentPenaltyInput");
+  const earlyWipeEl = document.getElementById("earlyExitWipeMomentumInput");
+  const giveUpPercentEl = document.getElementById("giveUpPercentPenaltyInput");
+  const giveUpFlatEl = document.getElementById("giveUpFlatPenaltyInput");
+  const targetImDoneEl = document.getElementById("targetImDonePenaltyInput");
+  const targetGiveUpEl = document.getElementById("targetGiveUpPenaltyInput");
+  const bossCowardEl = document.getElementById("bossCowardicePenaltyInput");
+
+  if (earlyFlatEl) earlyFlatEl.value = earlyExitFlatPenalty;
+  if (earlyPercentEl) earlyPercentEl.value = earlyExitPercentPenalty;
+  if (earlyWipeEl) earlyWipeEl.value = earlyExitWipeMomentum ? "1" : "0";
+  if (giveUpPercentEl) giveUpPercentEl.value = giveUpPercentPenalty;
+  if (giveUpFlatEl) giveUpFlatEl.value = giveUpFlatPenalty;
+  if (targetImDoneEl) targetImDoneEl.value = targetImDonePenalty;
+  if (targetGiveUpEl) targetGiveUpEl.value = targetGiveUpPenalty;
+  if (bossCowardEl) bossCowardEl.value = bossCowardicePenalty;
+
+  // Swing ranges per difficulty
+  document.getElementById("swingEasyMin").value = swingRanges.easy.min;
+  document.getElementById("swingEasyMax").value = swingRanges.easy.max;
+  document.getElementById("swingMediumMin").value = swingRanges.medium.min;
+  document.getElementById("swingMediumMax").value = swingRanges.medium.max;
+  document.getElementById("swingHardMin").value = swingRanges.hard.min;
+  document.getElementById("swingHardMax").value = swingRanges.hard.max;
+  document.getElementById("swingExtremeMin").value = swingRanges.extreme.min;
+  document.getElementById("swingExtremeMax").value = swingRanges.extreme.max;
+  document.getElementById("swingFullForceMin").value = swingRanges.fullForce.min;
+  document.getElementById("swingFullForceMax").value = swingRanges.fullForce.max;
+  document.getElementById("swingMaxPowerMin").value = swingRanges.maxPower.min;
+  document.getElementById("swingMaxPowerMax").value = swingRanges.maxPower.max;
+
+  // Boss swing multiplier
+  document.getElementById("bossSwingMultiplierInput").value = bossSwingMultiplier;
+
+  // Soft save timeout
+  document.getElementById("softSaveTimeoutInput").value = softSaveTimeoutMinutes;
+
+  document.getElementById("settingsOverlay").classList.add("active");
+  document.getElementById("menu").classList.remove("active");
+}
+
+function closeSettings() {
+  document.getElementById("settingsOverlay").classList.remove("active");
+}
+
+function applySettings() {
+  // difficulties
+  difficulties = difficulties.map((d, i) => {
+    const p = parseFloat(document.getElementById("diffProb_" + i).value);
+    const m = parseFloat(document.getElementById("diffMult_" + i).value);
+    return {
+      name: d.name,
+      prob: isNaN(p) ? d.prob : p,
+      mult: isNaN(m) ? d.mult : m
+    };
+  });
+
+  // block size settings
+  const brMin = parseInt(document.getElementById("blockRoundsMinInput").value);
+  const brMax = parseInt(document.getElementById("blockRoundsMaxInput").value);
+  if (!isNaN(brMin) && brMin >= 1) blockRoundsMin = brMin;
+  if (!isNaN(brMax) && brMax >= blockRoundsMin) blockRoundsMax = brMax;
+  
+  for (let i = 0; i < 4; i++) {
+    const wVal = parseFloat(document.getElementById("blockBandW" + i).value);
+    if (!isNaN(wVal) && wVal >= 0) blockBandWeights[i] = wVal;
+  }
+
+  // exit settings
+  const minRoundsVal = parseInt(document.getElementById("minRoundsBeforeExitInput").value);
+  if (!isNaN(minRoundsVal) && minRoundsVal >= 1) minRoundsBeforeExit = minRoundsVal;
+
+  // exit ends
+  state.exitWeights = state.exitWeights.map((w, i) => {
+    const el = document.getElementById("exitEnd" + i);
+    if (!el) return w;
+    const endVal = parseFloat(el.value);
+    const end = isNaN(endVal) ? w.end : endVal;
+    const cont = 100 - end;
+    return { end, cont };
+  });
+
+  // per-round min/max caps (values in %; you can go very small)
+  const fMin = parseFloat(document.getElementById("fullMinPerRoundInput").value);
+  const fMax = parseFloat(document.getElementById("fullMaxPerRoundInput").value);
+  const hMin = parseFloat(document.getElementById("halfMinPerRoundInput").value);
+  const hMax = parseFloat(document.getElementById("halfMaxPerRoundInput").value);
+  const lMin = parseFloat(document.getElementById("lockMinPerRoundInput").value);
+  const lMax = parseFloat(document.getElementById("lockMaxPerRoundInput").value);
+
+  if (!isNaN(fMin)) minFullPerRound = Math.max(0, fMin);
+  if (!isNaN(fMax)) maxFullPerRound = Math.max(0, fMax);
+  if (!isNaN(hMin)) minHalfPerRound = Math.max(0, hMin);
+  if (!isNaN(hMax)) maxHalfPerRound = Math.max(0, hMax);
+  if (!isNaN(lMin)) minLockPerRound = Math.max(0, lMin);
+  if (!isNaN(lMax)) maxLockPerRound = Math.max(0, lMax);
+
+  // basic safety: enforce max >= min
+  if (maxFullPerRound < minFullPerRound) maxFullPerRound = minFullPerRound;
+  if (maxHalfPerRound < minHalfPerRound) maxHalfPerRound = minHalfPerRound;
+  if (maxLockPerRound < minLockPerRound) maxLockPerRound = minLockPerRound;
+
+
+  // band weights for per-round RNG
+  const bwLow = parseFloat(document.getElementById("bandWeightLowInput").value);
+  const bwMed = parseFloat(document.getElementById("bandWeightMedInput").value);
+  const bwHigh = parseFloat(document.getElementById("bandWeightHighInput").value);
+  if (!isNaN(bwLow)) bandWeightLow = Math.max(1, bwLow);
+  if (!isNaN(bwMed)) bandWeightMed = Math.max(1, bwMed);
+  if (!isNaN(bwHigh)) bandWeightHigh = Math.max(1, bwHigh);
+
+  // momentum tuning
+  const mrps = parseFloat(document.getElementById("momentumRoundsPerStepInput").value);
+  const mbt = parseFloat(document.getElementById("momentumBigBlockThresholdInput").value);
+  const mbb = parseFloat(document.getElementById("momentumBigBlockBonusInput").value);
+  const mmcb = parseFloat(document.getElementById("momentumMaxCycleBonusInput").value);
+  const mcap = parseFloat(document.getElementById("momentumCapPerLevelInput").value);
+  const mcapMax = parseFloat(document.getElementById("momentumCapMaxMultInput").value);
+  const mshift = parseFloat(document.getElementById("bandShiftPerMomentumInput").value);
+  const mep = parseFloat(document.getElementById("momentumEarlyDonePenaltyInput").value);
+  const mgur = parseFloat(document.getElementById("momentumGiveUpResetToInput").value);
+
+  if (!isNaN(mrps) && mrps > 0) momentumRoundsPerStep = mrps;
+  if (!isNaN(mbt) && mbt > 0) momentumBigBlockThreshold = mbt;
+  if (!isNaN(mbb)) momentumBigBlockBonus = mbb;
+  if (!isNaN(mmcb)) momentumMaxCycleBonus = mmcb;
+  if (!isNaN(mcap)) momentumCapPerLevel = mcap;
+  if (!isNaN(mcapMax) && mcapMax > 0) momentumCapMaxMult = mcapMax;
+  if (!isNaN(mshift)) bandShiftPerMomentum = mshift;
+  if (!isNaN(mep) && mep >= 0) momentumEarlyDonePenalty = mep;
+  if (!isNaN(mgur) && mgur >= 0) momentumGiveUpResetTo = mgur;
+
+  // max power
+  const mpc = parseFloat(document.getElementById("maxPowerChanceInput").value);
+  if (!isNaN(mpc)) maxPowerCycleChance = mpc;
+
+  const mpMin = parseFloat(document.getElementById("maxPowerBlockMinInput").value);
+  const mpMax = parseFloat(document.getElementById("maxPowerBlockMaxInput").value);
+  const mpMult = parseFloat(document.getElementById("maxPowerMultiplierInput").value);
+
+  if (!isNaN(mpMin)) maxPowerBlockMin = Math.max(1, mpMin);
+  if (!isNaN(mpMax)) maxPowerBlockMax = Math.max(maxPowerBlockMin, mpMax);
+  if (!isNaN(mpMult) && mpMult > 0) maxPowerMultiplier = mpMult;
+
+  // boss block settings
+  const bbcEl = document.getElementById("bossBlockChanceInput");
+  const bbMinEl = document.getElementById("bossMinRoundsInput");
+  const bbMaxEl = document.getElementById("bossMaxRoundsInput");
+  if (bbcEl) {
+    const bbc = parseFloat(bbcEl.value);
+    if (!isNaN(bbc) && bbc >= 0) bossBlockChance = bbc / 100; // convert from percent
+  }
+  if (bbMinEl) {
+    const bbMin = parseFloat(bbMinEl.value);
+    if (!isNaN(bbMin) && bbMin >= 1) bossMinRounds = Math.floor(bbMin);
+  }
+  if (bbMaxEl) {
+    const bbMax = parseFloat(bbMaxEl.value);
+    if (!isNaN(bbMax) && bbMax >= bossMinRounds) bossMaxRounds = Math.floor(bbMax);
+  }
+
+  // cookie roll settings
+  const crMin = parseInt(document.getElementById("cookieRollMinInput").value);
+  const crMax = parseInt(document.getElementById("cookieRollMaxInput").value);
+  if (!isNaN(crMin) && crMin >= 1) cookieRollMin = crMin;
+  if (!isNaN(crMax) && crMax >= cookieRollMin) cookieRollMax = crMax;
+  
+  for (let i = 0; i < 4; i++) {
+    const wVal = parseFloat(document.getElementById("cookieBandW" + i).value);
+    if (!isNaN(wVal) && wVal >= 0) cookieBandWeights[i] = wVal;
+  }
+
+  // lock roll settings
+  const lrMin = parseInt(document.getElementById("lockRollMinInput").value);
+  const lrMax = parseInt(document.getElementById("lockRollMaxInput").value);
+  if (!isNaN(lrMin) && lrMin >= 1) lockRollMin = lrMin;
+  if (!isNaN(lrMax) && lrMax >= lockRollMin) lockRollMax = lrMax;
+  
+  for (let i = 0; i < 4; i++) {
+    const wVal = parseFloat(document.getElementById("lockBandW" + i).value);
+    if (!isNaN(wVal) && wVal >= 0) lockBandWeights[i] = wVal;
+  }
+
+  // punishment settings
+  const earlyFlatEl = document.getElementById("earlyExitFlatPenaltyInput");
+  const earlyPercentEl = document.getElementById("earlyExitPercentPenaltyInput");
+  const earlyWipeEl = document.getElementById("earlyExitWipeMomentumInput");
+  const giveUpPercentEl = document.getElementById("giveUpPercentPenaltyInput");
+  const giveUpFlatEl = document.getElementById("giveUpFlatPenaltyInput");
+  const targetImDoneEl = document.getElementById("targetImDonePenaltyInput");
+  const targetGiveUpEl = document.getElementById("targetGiveUpPenaltyInput");
+  const bossCowardEl = document.getElementById("bossCowardicePenaltyInput");
+
+  if (earlyFlatEl) {
+    const v = parseFloat(earlyFlatEl.value);
+    if (!isNaN(v)) earlyExitFlatPenalty = v;
+  }
+  if (earlyPercentEl) {
+    const v = parseFloat(earlyPercentEl.value);
+    if (!isNaN(v)) earlyExitPercentPenalty = v;
+  }
+  if (earlyWipeEl) {
+    earlyExitWipeMomentum = earlyWipeEl.value === "1";
+  }
+  if (giveUpPercentEl) {
+    const v = parseFloat(giveUpPercentEl.value);
+    if (!isNaN(v)) giveUpPercentPenalty = v;
+  }
+  if (giveUpFlatEl) {
+    const v = parseFloat(giveUpFlatEl.value);
+    if (!isNaN(v)) giveUpFlatPenalty = v;
+  }
+  if (targetImDoneEl) {
+    const v = parseFloat(targetImDoneEl.value);
+    if (!isNaN(v)) targetImDonePenalty = v;
+  }
+  if (targetGiveUpEl) {
+    const v = parseFloat(targetGiveUpEl.value);
+    if (!isNaN(v)) targetGiveUpPenalty = v;
+  }
+  if (bossCowardEl) {
+    const v = parseFloat(bossCowardEl.value);
+    if (!isNaN(v)) bossCowardicePenalty = v;
+  }
+
+  // Swing ranges per difficulty
+  const seMin = parseInt(document.getElementById("swingEasyMin").value);
+  const seMax = parseInt(document.getElementById("swingEasyMax").value);
+  const smMin = parseInt(document.getElementById("swingMediumMin").value);
+  const smMax = parseInt(document.getElementById("swingMediumMax").value);
+  const shMin = parseInt(document.getElementById("swingHardMin").value);
+  const shMax = parseInt(document.getElementById("swingHardMax").value);
+  const sxMin = parseInt(document.getElementById("swingExtremeMin").value);
+  const sxMax = parseInt(document.getElementById("swingExtremeMax").value);
+  const sfMin = parseInt(document.getElementById("swingFullForceMin").value);
+  const sfMax = parseInt(document.getElementById("swingFullForceMax").value);
+  const spMin = parseInt(document.getElementById("swingMaxPowerMin").value);
+  const spMax = parseInt(document.getElementById("swingMaxPowerMax").value);
+
+  if (!isNaN(seMin) && seMin >= 1) swingRanges.easy.min = seMin;
+  if (!isNaN(seMax) && seMax >= swingRanges.easy.min) swingRanges.easy.max = seMax;
+  if (!isNaN(smMin) && smMin >= 1) swingRanges.medium.min = smMin;
+  if (!isNaN(smMax) && smMax >= swingRanges.medium.min) swingRanges.medium.max = smMax;
+  if (!isNaN(shMin) && shMin >= 1) swingRanges.hard.min = shMin;
+  if (!isNaN(shMax) && shMax >= swingRanges.hard.min) swingRanges.hard.max = shMax;
+  if (!isNaN(sxMin) && sxMin >= 1) swingRanges.extreme.min = sxMin;
+  if (!isNaN(sxMax) && sxMax >= swingRanges.extreme.min) swingRanges.extreme.max = sxMax;
+  if (!isNaN(sfMin) && sfMin >= 1) swingRanges.fullForce.min = sfMin;
+  if (!isNaN(sfMax) && sfMax >= swingRanges.fullForce.min) swingRanges.fullForce.max = sfMax;
+  if (!isNaN(spMin) && spMin >= 1) swingRanges.maxPower.min = spMin;
+  if (!isNaN(spMax) && spMax >= swingRanges.maxPower.min) swingRanges.maxPower.max = spMax;
+
+  // Boss swing multiplier
+  const bsm = parseInt(document.getElementById("bossSwingMultiplierInput").value);
+  if (!isNaN(bsm) && bsm >= 1) bossSwingMultiplier = bsm;
+
+  // Soft save timeout
+  const sst = parseInt(document.getElementById("softSaveTimeoutInput").value);
+  if (!isNaN(sst) && sst >= 1) softSaveTimeoutMinutes = sst;
+
+  closeSettings();
+  appendLog("\n[Settings] Updated difficulty, weights & multipliers.");
+  saveState({ silent: true });
+}
+
+/* ========= INIT ========= */
+function autoInit() {
+  try {
+    const raw = localStorage.getItem("cycleGameState");
+    if (raw) {
+      loadState(true);
+      return;
+    }
+  } catch (e) {
+    // ignore and fall back to fresh init
+  }
+  updateBadges();
+  setLogHtml(createWelcomeMessage());
+}
+
+window.addEventListener("load", autoInit);
+    </script>
+
+</body>
+</html>
