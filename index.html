@@ -441,6 +441,186 @@
             width: 60px;
         }
 
+        /* ========= DIFFICULTY SLIDER SYSTEM ========= */
+        .difficulty-sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .diff-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diff-slider-row .diff-name {
+            width: 90px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .diff-slider-row .diff-lock {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            background: rgba(71, 85, 105, 0.4);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .diff-slider-row .diff-lock:hover {
+            background: rgba(71, 85, 105, 0.6);
+        }
+
+        .diff-slider-row .diff-lock.locked {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+
+        .diff-slider-container {
+            flex: 1;
+            position: relative;
+            height: 28px;
+            display: flex;
+            align-items: center;
+        }
+
+        .diff-slider-bg {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: rgba(71, 85, 105, 0.4);
+            border-radius: 4px;
+        }
+
+        .diff-slider-fill {
+            position: absolute;
+            left: 0;
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.1s;
+        }
+
+        .diff-slider-row[data-diff="Easy"] .diff-slider-fill { background: linear-gradient(90deg, #22c55e, #4ade80); }
+        .diff-slider-row[data-diff="Medium"] .diff-slider-fill { background: linear-gradient(90deg, #eab308, #facc15); }
+        .diff-slider-row[data-diff="Hard"] .diff-slider-fill { background: linear-gradient(90deg, #f97316, #fb923c); }
+        .diff-slider-row[data-diff="Extreme"] .diff-slider-fill { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .diff-slider-row[data-diff="Full Force"] .diff-slider-fill { background: linear-gradient(90deg, #a855f7, #c084fc); }
+        .diff-slider-row[data-diff="MAX POWER"] .diff-slider-fill { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+        .diff-slider-input {
+            position: absolute;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 28px;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .diff-slider-row .diff-value {
+            width: 55px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e5e7eb;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .diff-slider-row .diff-value:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .difficulty-total {
+            text-align: right;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .difficulty-total span {
+            font-weight: 600;
+            color: #22c55e;
+        }
+
+        .difficulty-total span.over {
+            color: #ef4444;
+        }
+
+        .difficulty-total span.under {
+            color: #fbbf24;
+        }
+
+        .difficulty-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-normalize {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-normalize:hover {
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+        /* Difficulty Multipliers */
+        .difficulty-mults {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .diff-mult-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diff-mult-row .diff-name {
+            width: 90px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .diff-mult-row input {
+            width: 70px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e5e7eb;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .diff-mult-row input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
         .field-row .triple-input {
             display: flex;
             gap: 8px;
@@ -1661,9 +1841,23 @@
                     <div class="settings-group">
                         <h3><span class="icon">🎲</span> Difficulty Chances</h3>
                         <div class="description">
-                            Each round rolls one of 6 difficulty levels. Higher difficulties give more Progress but are rarer. The % values control how often each appears.
+                            Set your desired %, then click 🔒 to lock it. Press "Equalize" to distribute the remaining % among unlocked slots.
                         </div>
-                        <div id="settingsDiffs"></div>
+                        <div class="difficulty-total">
+                            Total: <span id="diffTotalDisplay">100</span>%
+                        </div>
+                        <div id="settingsDiffs" class="difficulty-sliders"></div>
+                        <div class="difficulty-actions">
+                            <button type="button" class="btn-normalize" onclick="normalizeDifficulties()">⚖ Equalize to 100%</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <h3><span class="icon">⚔️</span> Difficulty Multipliers</h3>
+                        <div class="description">
+                            Multiplier affects how much Progress you gain per round at each difficulty level.
+                        </div>
+                        <div id="settingsDiffMults" class="difficulty-mults"></div>
                     </div>
 
                     <div class="settings-group">
@@ -4713,28 +4907,98 @@ function applySaveData(s) {
 
 /* ========= SETTINGS UI ========= */
 function openSettings() {
-  // build difficulty fields
+  // build difficulty sliders
   const container = document.getElementById("settingsDiffs");
   container.innerHTML = "";
   difficulties.forEach((d, i) => {
     const row = document.createElement("div");
-    row.className = "field-row";
-    const label = document.createElement("label");
-    label.textContent = d.name + " prob / mult";
-    const inputProb = document.createElement("input");
-    inputProb.type = "number";
-    inputProb.step = "0.1";
-    inputProb.id = "diffProb_" + i;
-    inputProb.value = d.prob;
-    const inputMult = document.createElement("input");
-    inputMult.type = "number";
-    inputMult.step = "0.01";
-    inputMult.id = "diffMult_" + i;
-    inputMult.value = d.mult;
-    row.appendChild(label);
-    row.appendChild(inputProb);
-    row.appendChild(inputMult);
+    row.className = "diff-slider-row";
+    row.dataset.diff = d.name;
+    row.dataset.index = i;
+    
+    // Name
+    const name = document.createElement("div");
+    name.className = "diff-name";
+    name.textContent = d.name;
+    
+    // Slider container
+    const sliderContainer = document.createElement("div");
+    sliderContainer.className = "diff-slider-container";
+    
+    const sliderBg = document.createElement("div");
+    sliderBg.className = "diff-slider-bg";
+    
+    const sliderFill = document.createElement("div");
+    sliderFill.className = "diff-slider-fill";
+    sliderFill.id = "diffFill_" + i;
+    sliderFill.style.width = d.prob + "%";
+    
+    const sliderInput = document.createElement("input");
+    sliderInput.type = "range";
+    sliderInput.className = "diff-slider-input";
+    sliderInput.id = "diffSlider_" + i;
+    sliderInput.min = "0";
+    sliderInput.max = "100";
+    sliderInput.step = "0.1";
+    sliderInput.value = d.prob;
+    sliderInput.oninput = function() { onDiffSliderChange(i, parseFloat(this.value)); };
+    
+    sliderContainer.appendChild(sliderBg);
+    sliderContainer.appendChild(sliderFill);
+    sliderContainer.appendChild(sliderInput);
+    
+    // Value input
+    const valueInput = document.createElement("input");
+    valueInput.type = "number";
+    valueInput.className = "diff-value";
+    valueInput.id = "diffProb_" + i;
+    valueInput.min = "0";
+    valueInput.max = "100";
+    valueInput.step = "0.1";
+    valueInput.value = d.prob;
+    valueInput.onchange = function() { onDiffValueChange(i, parseFloat(this.value)); };
+    
+    // Lock button
+    const lock = document.createElement("button");
+    lock.type = "button";
+    lock.className = "diff-lock";
+    lock.id = "diffLock_" + i;
+    lock.innerHTML = "🔓";
+    lock.title = "Lock this value when equalizing";
+    lock.onclick = function() {
+      this.classList.toggle("locked");
+      this.innerHTML = this.classList.contains("locked") ? "🔒" : "🔓";
+    };
+    
+    row.appendChild(name);
+    row.appendChild(sliderContainer);
+    row.appendChild(valueInput);
+    row.appendChild(lock);
     container.appendChild(row);
+  });
+  
+  updateDiffTotal();
+  
+  // build multiplier fields
+  const multContainer = document.getElementById("settingsDiffMults");
+  multContainer.innerHTML = "";
+  difficulties.forEach((d, i) => {
+    const row = document.createElement("div");
+    row.className = "diff-mult-row";
+    
+    const name = document.createElement("div");
+    name.className = "diff-name";
+    name.textContent = d.name;
+    
+    const multInput = document.createElement("input");
+    multInput.type = "number";
+    multInput.id = "diffMult_" + i;
+    multInput.step = "0.01";
+    multInput.value = d.mult;
+    
+    row.appendChild(name);
+    row.appendChild(multInput);
+    multContainer.appendChild(row);
   });
 
   // block size settings
@@ -4866,15 +5130,114 @@ function openSettings() {
   document.getElementById("menu").classList.remove("active");
 }
 
+/* ========= DIFFICULTY SLIDER FUNCTIONS ========= */
+function onDiffSliderChange(changedIndex, newValue) {
+  // Just update the value input and fill bar - no auto-rebalancing
+  document.getElementById("diffProb_" + changedIndex).value = newValue.toFixed(1);
+  document.getElementById("diffFill_" + changedIndex).style.width = newValue + "%";
+  updateDiffTotal();
+}
+
+function onDiffValueChange(changedIndex, newValue) {
+  if (isNaN(newValue) || newValue < 0) newValue = 0;
+  if (newValue > 100) newValue = 100;
+  
+  // Update the slider and fill bar
+  document.getElementById("diffSlider_" + changedIndex).value = newValue;
+  document.getElementById("diffFill_" + changedIndex).style.width = newValue + "%";
+  document.getElementById("diffProb_" + changedIndex).value = newValue.toFixed(1);
+  updateDiffTotal();
+}
+
+function updateDiffTotal() {
+  let total = 0;
+  for (let i = 0; i < difficulties.length; i++) {
+    total += parseFloat(document.getElementById("diffProb_" + i).value) || 0;
+  }
+  
+  const display = document.getElementById("diffTotalDisplay");
+  display.textContent = total.toFixed(1);
+  display.classList.remove("over", "under");
+  
+  if (total > 100.1) {
+    display.classList.add("over");
+  } else if (total < 99.9) {
+    display.classList.add("under");
+  }
+}
+
+function normalizeDifficulties() {
+  // Get locked total and unlocked values
+  let lockedTotal = 0;
+  let unlockedTotal = 0;
+  let unlockedCount = 0;
+  const values = [];
+  const locked = [];
+  
+  for (let i = 0; i < difficulties.length; i++) {
+    const val = parseFloat(document.getElementById("diffProb_" + i).value) || 0;
+    const lockEl = document.getElementById("diffLock_" + i);
+    const isLocked = lockEl && lockEl.classList.contains("locked");
+    
+    values.push(val);
+    locked.push(isLocked);
+    
+    if (isLocked) {
+      lockedTotal += val;
+    } else {
+      unlockedTotal += val;
+      unlockedCount++;
+    }
+  }
+  
+  // Calculate remaining % for unlocked slots
+  const remaining = 100 - lockedTotal;
+  
+  if (remaining < 0) {
+    alert("Locked values exceed 100%! Unlock some values first.");
+    return;
+  }
+  
+  if (unlockedCount === 0) {
+    alert("All values are locked! Unlock at least one to equalize.");
+    return;
+  }
+  
+  // Distribute remaining among unlocked proportionally (or evenly if all zero)
+  for (let i = 0; i < difficulties.length; i++) {
+    if (!locked[i]) {
+      let newVal;
+      if (unlockedTotal > 0) {
+        // Proportional distribution based on current values
+        newVal = (values[i] / unlockedTotal) * remaining;
+      } else {
+        // Even distribution if all unlocked are zero
+        newVal = remaining / unlockedCount;
+      }
+      
+      document.getElementById("diffProb_" + i).value = newVal.toFixed(1);
+      document.getElementById("diffSlider_" + i).value = newVal;
+      document.getElementById("diffFill_" + i).style.width = newVal + "%";
+    }
+  }
+  
+  updateDiffTotal();
+}
+
 function closeSettings() {
+  // Auto-apply settings when closing
+  applySettingsFromUI();
   document.getElementById("settingsOverlay").classList.remove("active");
 }
 
-function applySettings() {
+function applySettingsFromUI() {
   // difficulties
   difficulties = difficulties.map((d, i) => {
-    const p = parseFloat(document.getElementById("diffProb_" + i).value);
-    const m = parseFloat(document.getElementById("diffMult_" + i).value);
+    const probEl = document.getElementById("diffProb_" + i);
+    const multEl = document.getElementById("diffMult_" + i);
+    if (!probEl || !multEl) return d;
+    const p = parseFloat(probEl.value);
+    const m = parseFloat(multEl.value);
     return {
       name: d.name,
       prob: isNaN(p) ? d.prob : p,
@@ -4907,7 +5270,7 @@ function applySettings() {
     return { end, cont };
   });
 
-  // per-round min/max caps (values in %; you can go very small)
+  // per-round min/max caps
   const fMin = parseFloat(document.getElementById("fullMinPerRoundInput").value);
   const fMax = parseFloat(document.getElementById("fullMaxPerRoundInput").value);
   const hMin = parseFloat(document.getElementById("halfMinPerRoundInput").value);
@@ -4922,68 +5285,122 @@ function applySettings() {
   if (!isNaN(lMin)) minLockPerRound = Math.max(0, lMin);
   if (!isNaN(lMax)) maxLockPerRound = Math.max(0, lMax);
 
-  // basic safety: enforce max >= min
-  if (maxFullPerRound < minFullPerRound) maxFullPerRound = minFullPerRound;
-  if (maxHalfPerRound < minHalfPerRound) maxHalfPerRound = minHalfPerRound;
-  if (maxLockPerRound < minLockPerRound) maxLockPerRound = minLockPerRound;
+  // base gain/decrease
+  const baseFullEl = document.getElementById("baseFullGainInput");
+  const baseHalfEl = document.getElementById("baseHalfGainInput");
+  const baseLockEl = document.getElementById("baseLockDecreaseInput");
+  if (baseFullEl) {
+    const v = parseFloat(baseFullEl.value);
+    if (!isNaN(v)) fullBaseGain = v;
+  }
+  if (baseHalfEl) {
+    const v = parseFloat(baseHalfEl.value);
+    if (!isNaN(v)) halfBaseGain = v;
+  }
+  if (baseLockEl) {
+    const v = parseFloat(baseLockEl.value);
+    if (!isNaN(v)) lockBaseDecrease = v;
+  }
 
-
-  // band weights for per-round RNG
-  const bwLow = parseFloat(document.getElementById("bandWeightLowInput").value);
-  const bwMed = parseFloat(document.getElementById("bandWeightMedInput").value);
-  const bwHigh = parseFloat(document.getElementById("bandWeightHighInput").value);
-  if (!isNaN(bwLow)) bandWeightLow = Math.max(1, bwLow);
-  if (!isNaN(bwMed)) bandWeightMed = Math.max(1, bwMed);
-  if (!isNaN(bwHigh)) bandWeightHigh = Math.max(1, bwHigh);
-
-  // momentum tuning
-  const mrps = parseFloat(document.getElementById("momentumRoundsPerStepInput").value);
-  const mbt = parseFloat(document.getElementById("momentumBigBlockThresholdInput").value);
-  const mbb = parseFloat(document.getElementById("momentumBigBlockBonusInput").value);
-  const mmcb = parseFloat(document.getElementById("momentumMaxCycleBonusInput").value);
-  const mcap = parseFloat(document.getElementById("momentumCapPerLevelInput").value);
-  const mcapMax = parseFloat(document.getElementById("momentumCapMaxMultInput").value);
-  const mshift = parseFloat(document.getElementById("bandShiftPerMomentumInput").value);
-  const mep = parseFloat(document.getElementById("momentumEarlyDonePenaltyInput").value);
-  const mgur = parseFloat(document.getElementById("momentumGiveUpResetToInput").value);
-
-  if (!isNaN(mrps) && mrps > 0) momentumRoundsPerStep = mrps;
-  if (!isNaN(mbt) && mbt > 0) momentumBigBlockThreshold = mbt;
-  if (!isNaN(mbb)) momentumBigBlockBonus = mbb;
-  if (!isNaN(mmcb)) momentumMaxCycleBonus = mmcb;
-  if (!isNaN(mcap)) momentumCapPerLevel = mcap;
-  if (!isNaN(mcapMax) && mcapMax > 0) momentumCapMaxMult = mcapMax;
-  if (!isNaN(mshift)) bandShiftPerMomentum = mshift;
-  if (!isNaN(mep) && mep >= 0) momentumEarlyDonePenalty = mep;
-  if (!isNaN(mgur) && mgur >= 0) momentumGiveUpResetTo = mgur;
-
-  // max power
-  const mpc = parseFloat(document.getElementById("maxPowerChanceInput").value);
-  if (!isNaN(mpc)) maxPowerCycleChance = mpc;
-
-  const mpMin = parseFloat(document.getElementById("maxPowerBlockMinInput").value);
-  const mpMax = parseFloat(document.getElementById("maxPowerBlockMaxInput").value);
-  const mpMult = parseFloat(document.getElementById("maxPowerMultiplierInput").value);
-
-  if (!isNaN(mpMin)) maxPowerBlockMin = Math.max(1, mpMin);
-  if (!isNaN(mpMax)) maxPowerBlockMax = Math.max(maxPowerBlockMin, mpMax);
-  if (!isNaN(mpMult) && mpMult > 0) maxPowerMultiplier = mpMult;
+  // max power settings
+  const mpChance = parseFloat(document.getElementById("maxPowerChanceInput").value);
+  if (!isNaN(mpChance)) maxPowerCycleChance = mpChance;
+  const mpMinEl = document.getElementById("maxPowerBlockMinInput");
+  const mpMaxEl = document.getElementById("maxPowerBlockMaxInput");
+  const mpMultEl = document.getElementById("maxPowerMultiplierInput");
+  if (mpMinEl) {
+    const v = parseInt(mpMinEl.value);
+    if (!isNaN(v) && v >= 1) maxPowerBlockMin = v;
+  }
+  if (mpMaxEl) {
+    const v = parseInt(mpMaxEl.value);
+    if (!isNaN(v) && v >= maxPowerBlockMin) maxPowerBlockMax = v;
+  }
+  if (mpMultEl) {
+    const v = parseFloat(mpMultEl.value);
+    if (!isNaN(v)) maxPowerMultiplier = v;
+  }
 
   // boss block settings
-  const bbcEl = document.getElementById("bossBlockChanceInput");
+  const bbChanceEl = document.getElementById("bossBlockChanceInput");
   const bbMinEl = document.getElementById("bossMinRoundsInput");
   const bbMaxEl = document.getElementById("bossMaxRoundsInput");
-  if (bbcEl) {
-    const bbc = parseFloat(bbcEl.value);
-    if (!isNaN(bbc) && bbc >= 0) bossBlockChance = bbc / 100; // convert from percent
+  if (bbChanceEl) {
+    const v = parseFloat(bbChanceEl.value);
+    if (!isNaN(v)) bossBlockChance = v / 100; // convert from percent
   }
   if (bbMinEl) {
-    const bbMin = parseFloat(bbMinEl.value);
-    if (!isNaN(bbMin) && bbMin >= 1) bossMinRounds = Math.floor(bbMin);
+    const v = parseInt(bbMinEl.value);
+    if (!isNaN(v) && v >= 1) bossMinRounds = v;
   }
   if (bbMaxEl) {
-    const bbMax = parseFloat(bbMaxEl.value);
+    const bbMax = parseInt(bbMaxEl.value);
     if (!isNaN(bbMax) && bbMax >= bossMinRounds) bossMaxRounds = Math.floor(bbMax);
+  }
+
+  // band weights for per-round RNG
+  const bwLowInput = document.getElementById("bandWeightLowInput");
+  const bwMedInput = document.getElementById("bandWeightMedInput");
+  const bwHighInput = document.getElementById("bandWeightHighInput");
+  if (bwLowInput) {
+    const v = parseFloat(bwLowInput.value);
+    if (!isNaN(v)) bandWeightLow = v;
+  }
+  if (bwMedInput) {
+    const v = parseFloat(bwMedInput.value);
+    if (!isNaN(v)) bandWeightMed = v;
+  }
+  if (bwHighInput) {
+    const v = parseFloat(bwHighInput.value);
+    if (!isNaN(v)) bandWeightHigh = v;
+  }
+
+  // momentum tuning
+  const mRoundInput = document.getElementById("momentumRoundsPerStepInput");
+  const mBigThreshInput = document.getElementById("momentumBigBlockThresholdInput");
+  const mBigBonusInput = document.getElementById("momentumBigBlockBonusInput");
+  const mMaxCycleBonusInput = document.getElementById("momentumMaxCycleBonusInput");
+  const mCapPerLevelInput = document.getElementById("momentumCapPerLevelInput");
+  const mCapMaxMultInput = document.getElementById("momentumCapMaxMultInput");
+  const mShiftInput = document.getElementById("bandShiftPerMomentumInput");
+  const mEarlyPenaltyInput = document.getElementById("momentumEarlyDonePenaltyInput");
+  const mGiveUpInput = document.getElementById("momentumGiveUpResetToInput");
+
+  if (mRoundInput) {
+    const v = parseInt(mRoundInput.value);
+    if (!isNaN(v)) momentumRoundsPerStep = v;
+  }
+  if (mBigThreshInput) {
+    const v = parseInt(mBigThreshInput.value);
+    if (!isNaN(v)) momentumBigBlockThreshold = v;
+  }
+  if (mBigBonusInput) {
+    const v = parseInt(mBigBonusInput.value);
+    if (!isNaN(v)) momentumBigBlockBonus = v;
+  }
+  if (mMaxCycleBonusInput) {
+    const v = parseInt(mMaxCycleBonusInput.value);
+    if (!isNaN(v)) momentumMaxCycleBonus = v;
+  }
+  if (mCapPerLevelInput) {
+    const v = parseFloat(mCapPerLevelInput.value);
+    if (!isNaN(v)) momentumCapPerLevel = v;
+  }
+  if (mCapMaxMultInput) {
+    const v = parseFloat(mCapMaxMultInput.value);
+    if (!isNaN(v)) momentumCapMaxMult = v;
+  }
+  if (mShiftInput) {
+    const v = parseFloat(mShiftInput.value);
+    if (!isNaN(v)) bandShiftPerMomentum = v;
+  }
+  if (mEarlyPenaltyInput) {
+    const v = parseInt(mEarlyPenaltyInput.value);
+    if (!isNaN(v)) momentumEarlyDonePenalty = v;
+  }
+  if (mGiveUpInput) {
+    const v = parseInt(mGiveUpInput.value);
+    if (!isNaN(v)) momentumGiveUpResetTo = v;
   }
 
   // cookie roll settings
@@ -5085,9 +5502,14 @@ function applySettings() {
   const sst = parseInt(document.getElementById("softSaveTimeoutInput").value);
   if (!isNaN(sst) && sst >= 1) softSaveTimeoutMinutes = sst;
 
-  closeSettings();
-  appendLog("\n[Settings] Updated difficulty, weights & multipliers.");
+  // Save state with new settings
   saveState({ silent: true });
+}
+
+function applySettings() {
+  // Just close settings - closeSettings() will apply and save
+  closeSettings();
+  appendLog("\n[Settings] Updated and saved.");
 }
 
 /* ========= INIT ========= */
